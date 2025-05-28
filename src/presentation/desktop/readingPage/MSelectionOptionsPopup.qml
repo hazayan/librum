@@ -13,6 +13,7 @@ Popup {
     signal newWidth
     signal dictionaryOptionSelected(string word)
     signal explanationOptionSelected(string word)
+    signal translationOptionSelected(string word)
 
     padding: 0
     width: layout.width
@@ -164,7 +165,7 @@ Popup {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             opacity: lookUpTextArea.pressed ? 0.6 : 1
-            text: qsTr("Look Up")
+            text: qsTr("Definition")
             color: Style.colorText
             font.weight: Font.Normal
             font.pointSize: Fonts.size12dot25
@@ -204,7 +205,7 @@ Popup {
             Layout.leftMargin: 16
             Layout.rightMargin: 16
             opacity: explainTextArea.pressed ? 0.6 : 1
-            text: qsTr("Ai Explain")
+            text: qsTr("Explain")
             color: Style.colorText
             font.pointSize: Fonts.size12dot25
             font.weight: Font.Normal
@@ -222,8 +223,39 @@ Popup {
                     else
                         text = activeFocusItem.getHighlightedText(
                                     root.highlight)
-                    root.explanationOptionSelected(text)
 
+                    root.explanationOptionSelected(text)
+                    root.close()
+                }
+            }
+        }
+
+        Label {
+            id: translateText
+            Layout.fillWidth: true
+            Layout.leftMargin: 16
+            Layout.rightMargin: 16
+            opacity: lookUpTextArea.pressed ? 0.6 : 1
+            text: qsTr("Translate")
+            color: Style.colorText
+            font.weight: Font.Normal
+            font.pointSize: Fonts.size12dot25
+
+            MouseArea {
+                id: translateTextArea
+                anchors.fill: parent
+                cursorShape: Qt.PointingHandCursor
+                hoverEnabled: true
+
+                onClicked: {
+                    let text = ""
+                    if (root.highlight == "")
+                        text = activeFocusItem.getSelectedText()
+                    else
+                        text = activeFocusItem.getHighlightedText(
+                                    root.highlight)
+
+                    root.translationOptionSelected(text)
                     root.close()
                 }
             }

@@ -13,14 +13,14 @@ add_library(adapters
                     interfaces/controllers/i_book_controller.hpp
                     interfaces/controllers/i_app_info_controller.hpp
                     interfaces/controllers/i_dictionary_controller.hpp
-                    interfaces/controllers/i_ai_explanation_controller.hpp
+                    interfaces/controllers/i_ai_tools_controller.hpp
                     interfaces/controllers/i_folder_controller.hpp
                     interfaces/persistance/i_user_storage_access.hpp
                     interfaces/persistance/i_library_storage_access.hpp
                     interfaces/persistance/i_authentication_access.hpp
                     interfaces/persistance/i_app_info_access.hpp
                     interfaces/persistance/i_dictionary_access.hpp
-                    interfaces/persistance/i_ai_explanation_access.hpp
+                    interfaces/persistance/i_ai_tools_access.hpp
                     interfaces/persistance/i_folder_storage_access.hpp
                     
                     controllers/authentication_controller.cpp
@@ -41,8 +41,8 @@ add_library(adapters
                     controllers/page_controller.hpp
                     controllers/dictionary_controller.cpp
                     controllers/dictionary_controller.hpp
-                    controllers/ai_explanation_controller.cpp
-                    controllers/ai_explanation_controller.hpp
+                    controllers/ai_tools_controller.cpp
+                    controllers/ai_tools_controller.hpp
                     controllers/folder_controller.hpp
                     controllers/folder_controller.cpp
                     controllers/external_book_controller.hpp
@@ -62,8 +62,8 @@ add_library(adapters
                     gateways/app_info_gateway.hpp
                     gateways/dictionary_gateway.hpp
                     gateways/dictionary_gateway.cpp
-                    gateways/ai_explanation_gateway.cpp
-                    gateways/ai_explanation_gateway.hpp
+                    gateways/ai_tools_gateway.cpp
+                    gateways/ai_tools_gateway.hpp
                     gateways/folder_storage_gateway.hpp
                     gateways/folder_storage_gateway.cpp
                     

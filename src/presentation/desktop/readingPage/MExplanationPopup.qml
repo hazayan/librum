@@ -38,13 +38,13 @@ Popup {
     }
 
     Connections {
-        target: AiExplanationController
+        target: AiToolsController
 
-        function onWordReady(word) {
+        function onExplanationWordReady(word) {
             root.answer += word
         }
 
-        function onLimitReached() {
+        function onExplanationLimitReached() {
             errorItem.visible = true
             //: Make sure that the words make a valid sentence
             errorText.text = qsTr('You have reached your daily limit.') + ' '
@@ -53,10 +53,16 @@ Popup {
                         'Upgrade') + '</a> ' + qsTr('to continue.')
         }
 
-        function onRequestTooLong() {
+        function onExplanationRequestTooLong() {
             errorItem.visible = true
             errorText.text = qsTr(
                         'Oops! The text is too long. Please shorten your selection.')
+        }
+
+        function onExplanationErrorOccured() {
+            errorItem.visible = true
+            errorText.text = qsTr(
+                        'Oops! Something went wrong. Please try again later.')
         }
     }
 
@@ -316,7 +322,7 @@ Popup {
         property bool dataChanged: false
 
         function sendExplanationRequest() {
-            AiExplanationController.getExplanation(
+            AiToolsController.getExplanation(
                         root.question, explanationModes.get(
                             modesComboBox.listView.currentIndex).query)
         }

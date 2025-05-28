@@ -5,7 +5,8 @@
   item twice and create a result string from all selected items.
   */
 function addItemToSelectedItems(index) {
-    let newText = listView.itemAtIndex(index).getContent()
+    let newText = listView.itemAtIndex(index).getProperty(
+            root.contentPropertyName)
     if (internal.selectedItems.length > 0 && internal.selectedItems.includes(
                 newText)) {
         // Remove item from array if it already exists
@@ -42,7 +43,8 @@ function selectItem(index) {
 
     newItem.selected = true
     listView.currentSelected = newItem
-    root.selectedContent = listView.currentSelected.getContent()
+    root.selectedContent = listView.currentSelected.getProperty(
+                root.contentPropertyName)
 }
 
 function deselectCurrentItem() {

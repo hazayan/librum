@@ -37,6 +37,8 @@ private:
     double getSystemFontSize() const override;
     bool isOnline() const override;
     QString getLanguage() const override;
+    QString getLastTranslationLanguage() const override;
+    void setLastTranslationLanguage(QString& language) override;
 
     application::IAppInfoService* m_appInfoService;
     QNetworkInformation* m_networkInfo;

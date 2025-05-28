@@ -7,20 +7,23 @@
 #include <QNetworkRequest>
 #include <QObject>
 #include <QSettings>
-#include "i_ai_explanation_access.hpp"
+#include "i_ai_tools_access.hpp"
 
 namespace infrastructure::persistence
 {
 
-class AiExplanationAccess : public adapters::IAiExplanationAccess
+class AiToolsAccess : public adapters::IAiToolsAccess
 {
     Q_OBJECT
 
 public:
-    AiExplanationAccess();
+    AiToolsAccess();
 
     void getExplanation(const QString& authToken, const QString& query,
                         const QString& mode) override;
+    void getTranslation(const QString& authToken, const QString& text,
+                        const QString& sourceLang,
+                        const QString& targetLang) override;
 
 private:
     QNetworkRequest createRequest(QUrl url, QString authToken) const;

@@ -118,5 +118,6 @@
         <file>toolsPage/MImageToPdfPopup.qml</file>
         <file>toolsPage/MPdfToImagePopup.qml</file>
         <file>modules/CustomComponents/MFeedbackPopup.qml</file>
+        <file>readingPage/MTranslationPopup.qml</file>
     </qresource>
 </RCC>

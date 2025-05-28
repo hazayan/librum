@@ -10,7 +10,7 @@ set(application_SRC
     interfaces/services/i_app_info_service.hpp
     interfaces/services/i_book_service.hpp
     interfaces/services/i_dictionary_service.hpp
-    interfaces/services/i_ai_explanation_service.hpp
+    interfaces/services/i_ai_tools_service.hpp
     interfaces/services/i_folder_service.hpp
     interfaces/gateways/i_free_books_storage_gateway.hpp
     interfaces/gateways/i_user_storage_gateway.hpp
@@ -18,7 +18,7 @@ set(application_SRC
     interfaces/gateways/i_authentication_gateway.hpp
     interfaces/gateways/i_app_info_gateway.hpp
     interfaces/gateways/i_dictionary_gateway.hpp
-    interfaces/gateways/i_ai_explanation_gateway.hpp
+    interfaces/gateways/i_ai_tools_gateway.hpp
     interfaces/gateways/i_folder_storage_gateway.hpp
     interfaces/managers/i_library_storage_manager.hpp
     interfaces/utility/i_metadata_extractor.hpp
@@ -42,8 +42,8 @@ set(application_SRC
     services/book_service.cpp
     services/dictionary_service.cpp
     services/dictionary_service.hpp
-    services/ai_explanation_service.cpp
-    services/ai_explanation_service.hpp
+    services/ai_tools_service.cpp
+    services/ai_tools_service.hpp
     services/folder_service.hpp
     services/folder_service.cpp
     services/tools_service.hpp

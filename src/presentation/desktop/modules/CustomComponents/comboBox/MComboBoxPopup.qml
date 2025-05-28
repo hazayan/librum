@@ -66,8 +66,8 @@ Popup {
                 onClicked: (mouse, index) => root.selectItem(index)
 
                 // Overwrite the way the model's text is queried
-                function getContent() {
-                    return model[root.contentPropertyName]
+                function getProperty(propertyName) {
+                    return model[propertyName]
                 }
             }
 
@@ -84,6 +84,10 @@ Popup {
         // If multi select is turned on, multiple items can be selected, thus
         // this is a storage for all the currently selected items
         property var selectedItems: []
+    }
+
+    function getPropertyOfSelectedItem(propName) {
+        return listView.currentSelected.getProperty(propName)
     }
 
     function selectItem(index, initialSelect = false) {

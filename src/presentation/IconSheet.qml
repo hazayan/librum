@@ -10,6 +10,7 @@ Item {
     property string arrowheadNextIcon
     property string dropdownDark
     property string dropdownLight
+    property string repeat
 
     // Decision-icons
     property string checkGreen
@@ -172,6 +173,10 @@ Item {
             PropertyChanges {
                 target: iconSheet
                 dropdownLight: "/resources/images/light_mode/arrows/dropdown_light.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                repeat: "/resources/images/light_mode/arrows/repeat.svg"
             }
 
             // Decision-icons
@@ -619,6 +624,10 @@ Item {
             PropertyChanges {
                 target: iconSheet
                 dropdownLight: "/resources/images/dark_mode/arrows/dropdown_light.svg"
+            }
+            PropertyChanges {
+                target: iconSheet
+                repeat: "/resources/images/dark_mode/arrows/repeat.svg"
             }
 
             // Decision-icons

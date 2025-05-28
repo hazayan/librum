@@ -114,13 +114,13 @@ int main(int argc, char* argv[])
     qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "AppInfoController",
                                  appInfoController.get());
 
-    // Ai explanation
-    auto* aiExplanationService =
-        config::diConfig().create<application::IAiExplanationService*>();
-    auto aiExplanationController =
-        std::make_unique<AiExplanationController>(aiExplanationService);
-    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "AiExplanationController",
-                                 aiExplanationController.get());
+    // Ai Tools
+    auto* aiToolsService =
+        config::diConfig().create<application::IAiToolsService*>();
+    auto aiToolsController =
+        std::make_unique<AiToolsController>(aiToolsService);
+    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "AiToolsController",
+                                 aiToolsController.get());
 
     // User Stack
     auto* userService = config::diConfig().create<application::IUserService*>();
@@ -213,10 +213,10 @@ int main(int argc, char* argv[])
     QObject::connect(authenticationService, &application::IAuthenticationService::loggedIn,
                      freeBooksService, &application::IFreeBooksService::setupUserData);
     QObject::connect(authenticationService, &application::IAuthenticationService::loggedIn,
-                     aiExplanationService, &application::IAiExplanationService::setupUserData);
+                     aiToolsService, &application::IAiToolsService::setupUserData);
 
     QObject::connect(authenticationService, &application::IAuthenticationService::loggedOut,
-                     aiExplanationService, &application::IAiExplanationService::clearUserData);
+                     aiToolsService, &application::IAiToolsService::clearUserData);
     QObject::connect(authenticationService, &application::IAuthenticationService::loggedOut,
         freeBooksService, &application::IFreeBooksService::clearUserData);
 
@@ -251,23 +251,23 @@ int main(int argc, char* argv[])
     // Setup translations
     QSettings settings;
     auto storedLanguage = settings.value("language", QVariant("")).toString();
-    // if(storedLanguage.isEmpty())
-    // {
-    //     // If no language was specified in the settings, deduce the system language
-    //     const QStringList uiLanguages = QLocale::system().uiLanguages();
-    //     for(const QString& locale : uiLanguages)
-    //     {
-    //         const QString name = QLocale(locale).name();
-    //         if(appInfoController->switchToLanguage(name))
-    //         {
-    //             break;
-    //         }
-    //     }
-    // }
-    // else
-    // {
-    //     appInfoController->switchToLanguage(storedLanguage);
-    // }
+    if(storedLanguage.isEmpty())
+    {
+        // If no language was specified in the settings, deduce the system language
+        const QStringList uiLanguages = QLocale::system().uiLanguages();
+        for(const QString& locale : uiLanguages)
+        {
+            const QString name = QLocale(locale).name();
+            if(appInfoController->switchToLanguage(name))
+            {
+                break;
+            }
+        }
+    }
+    else
+    {
+        appInfoController->switchToLanguage(storedLanguage);
+    }
 
     if(app.arguments().size() == 2)
     {

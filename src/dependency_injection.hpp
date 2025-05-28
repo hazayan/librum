@@ -1,9 +1,9 @@
 #pragma once
 #include "../libs/di/include/boost/di.hpp"
-#include "ai_explanation_access.hpp"
-#include "ai_explanation_controller.hpp"
-#include "ai_explanation_gateway.hpp"
-#include "ai_explanation_service.hpp"
+#include "ai_tools_access.hpp"
+#include "ai_tools_controller.hpp"
+#include "ai_tools_gateway.hpp"
+#include "ai_tools_service.hpp"
 #include "app_info_access.hpp"
 #include "app_info_controller.hpp"
 #include "app_info_gateway.hpp"
@@ -74,12 +74,11 @@ const auto diConfig = []
         di::bind<IAppInfoGateway>().to<gateways::AppInfoGateway>(),
         di::bind<IAppInfoAccess>().to<persistence::AppInfoAccess>(),
 
-        // Ai explanation
-        di::bind<IAiExplanationController>()
-            .to<controllers::AiExplanationController>(),
-        di::bind<IAiExplanationService>().to<services::AiExplanationService>(),
-        di::bind<IAiExplanationGateway>().to<gateways::AiExplanationGateway>(),
-        di::bind<IAiExplanationAccess>().to<persistence::AiExplanationAccess>(),
+        // Ai Tools
+        di::bind<IAiToolsController>().to<controllers::AiToolsController>(),
+        di::bind<IAiToolsService>().to<services::AiToolsService>(),
+        di::bind<IAiToolsGateway>().to<gateways::AiToolsGateway>(),
+        di::bind<IAiToolsAccess>().to<persistence::AiToolsAccess>(),
 
         // Library
         di::bind<ILibraryController>().to<controllers::LibraryController>(),

@@ -32,6 +32,8 @@ class ADAPTERS_EXPORT IAppInfoController : public QObject
     Q_PROPERTY(int systemFontSize READ getSystemFontSize CONSTANT)
     Q_PROPERTY(bool online READ isOnline NOTIFY isOnlineChanged)
     Q_PROPERTY(QString language READ getLanguage NOTIFY languageChanged)
+    Q_PROPERTY(QString lastTranslationLanguage READ getLastTranslationLanguage
+                   WRITE setLastTranslationLanguage CONSTANT)
 
 public:
     virtual ~IAppInfoController() noexcept = default;
@@ -57,6 +59,8 @@ private:
     virtual double getSystemFontSize() const = 0;
     virtual bool isOnline() const = 0;
     virtual QString getLanguage() const = 0;
+    virtual QString getLastTranslationLanguage() const = 0;
+    virtual void setLastTranslationLanguage(QString& language) = 0;
 
 signals:
     void newestVersionChanged();

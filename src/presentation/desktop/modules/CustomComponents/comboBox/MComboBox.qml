@@ -201,6 +201,10 @@ Item {
         }
     }
 
+    function getPropertyOfSelectedItem(propName) {
+        return selectionPopup.getPropertyOfSelectedItem(propName)
+    }
+
     function selectItem(index, initialSelect = false) {
         selectionPopup.selectItem(index, initialSelect)
     }
@@ -213,10 +217,13 @@ Item {
         selectionPopup.close()
     }
 
-    function setDefaultItem(itemName) {
+    function setDefaultItem(itemName, propertyName) {
+        if (propertyName === undefined) {
+            propertyName = contentPropertyName
+        }
+
         for (var i = 0; i < selectionPopup.model.count; i++) {
-            if (selectionPopup.model.get(i)[contentPropertyName] === itemName) {
-                print("Found at index: " + i)
+            if (selectionPopup.model.get(i)[propertyName] === itemName) {
                 selectItem(i)
                 return
             }

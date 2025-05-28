@@ -242,6 +242,12 @@ Pane {
                                          explanationPopup.question = text
                                          explanationPopup.open()
                                      }
+
+        onTranslationOptionSelected: text => {
+                                         translationPopup.input = text.replace(
+                                             /\r|\n/g, '')
+                                         translationPopup.open()
+                                     }
     }
 
     MDictionaryPopup {
@@ -252,6 +258,12 @@ Pane {
         id: explanationPopup
         x: root.width / 2 - explanationPopup.width / 2
         y: root.height / 2 - explanationPopup.height / 2
+    }
+
+    MTranslationPopup {
+        id: translationPopup
+        x: root.width / 2 - translationPopup.width / 2
+        y: root.height / 2 - translationPopup.height / 2
     }
 
     function zoom(factor) {

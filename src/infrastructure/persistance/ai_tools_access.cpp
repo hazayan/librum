@@ -1,5 +1,6 @@
-#include "ai_explanation_access.hpp"
+#include "ai_tools_access.hpp"
 #include <QByteArray>
+#include <QDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkRequest>
@@ -10,15 +11,14 @@
 namespace infrastructure::persistence
 {
 
-AiExplanationAccess::AiExplanationAccess()
+AiToolsAccess::AiToolsAccess()
 {
     QSettings settings;
     domain = settings.value("serverHost").toString();
 }
 
-void AiExplanationAccess::getExplanation(const QString& authToken,
-                                         const QString& query,
-                                         const QString& mode)
+void AiToolsAccess::getExplanation(const QString& authToken,
+                                   const QString& query, const QString& mode)
 {
     auto request =
         createRequest(domain + data::aiCompletionEndpoint, authToken);
@@ -66,7 +66,7 @@ void AiExplanationAccess::getExplanation(const QString& authToken,
                     k += 1;
                 };
 
-                emit wordReceived(word);
+                emit explanationWordReceived(word);
             });
 
     connect(reply, &QNetworkReply::finished, this,
@@ -77,15 +77,50 @@ void AiExplanationAccess::getExplanation(const QString& authToken,
                     auto errorCode = api_error_helper::logErrorMessage(
                         reply, "Ai explanation");
 
-                    emit errorOccured(errorCode);
+                    emit explanationErrorOccured(errorCode);
                 }
 
                 reply->deleteLater();
             });
 }
 
-QNetworkRequest AiExplanationAccess::createRequest(QUrl url,
-                                                   QString authToken) const
+void AiToolsAccess::getTranslation(const QString& authToken,
+                                   const QString& text,
+                                   const QString& sourceLang,
+                                   const QString& targetLang)
+{
+    auto request =
+        createRequest(domain + data::aiTranslationEndpoint, authToken);
+    request.setAttribute(QNetworkRequest::CacheLoadControlAttribute,
+                         QNetworkRequest::AlwaysNetwork);
+
+    QJsonObject body;
+    body.insert("text", text);
+    body.insert("sourcelang", sourceLang);
+    body.insert("targetlang", targetLang);
+    QJsonDocument jsonDocument { body };
+    QByteArray data = jsonDocument.toJson(QJsonDocument::Compact);
+
+    auto reply = m_networkAccessManager.post(request, data);
+    connect(reply, &QNetworkReply::finished, this,
+            [this, reply]()
+            {
+                if(api_error_helper::apiRequestFailed(reply, 200))
+                {
+                    auto errorCode =
+                        api_error_helper::logErrorMessage(reply, "Translation");
+
+                    emit translationErrorOccured(errorCode);
+                    reply->deleteLater();
+                    return;
+                }
+
+                emit translationReceived(reply->readAll());
+                reply->deleteLater();
+            });
+}
+
+QNetworkRequest AiToolsAccess::createRequest(QUrl url, QString authToken) const
 {
     QNetworkRequest result { url };
     result.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");

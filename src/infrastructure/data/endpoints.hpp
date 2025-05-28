@@ -22,6 +22,7 @@ inline const QString binaryDownloadEndpoint {
 
 // AI endpoint
 inline const QString aiCompletionEndpoint { "/Ai/complete" };
+inline const QString aiTranslationEndpoint { "/Ai/translate" };
 
 // Library storage
 inline const QString bookCreationEndpoint { "/book" };
