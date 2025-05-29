@@ -27,12 +27,11 @@ Popup {
 
     onOpened: {
         root.translation = ""
+
+        let lastLang = AppInfoController.lastTranslationLanguage
+
+        targetLanguageComboBox.selectItemByValue(lastLang.toUpperCase(), "code")
         internal.sendTranslationRequest()
-
-        let x = AppInfoController.lastTranslationLanguage
-        print("AAA: " + x)
-
-        targetLanguageComboBox.setDefaultItem("a", "code")
     }
 
     onClosed: {
@@ -247,12 +246,10 @@ Popup {
                 dropdownIconSize: 10
                 contentPropertyName: "text"
                 checkBoxStyle: false
+                allowUnselectingItems: false
 
                 model: langModel
-                onItemChanged: {
-                    sourceLanguageComboBox.closePopup()
-                    internal.sendTranslationRequest()
-                }
+                onItemChanged: sourceLanguageComboBox.closePopup()
             }
 
             Item {
@@ -282,12 +279,10 @@ Popup {
                 dropdownIconSize: 10
                 contentPropertyName: "text"
                 checkBoxStyle: false
+                allowUnselectingItems: false
 
                 model: langModel
-                onItemChanged: {
-                    targetLanguageComboBox.closePopup()
-                    internal.sendTranslationRequest()
-                }
+                onItemChanged: targetLanguageComboBox.closePopup()
             }
         }
 
@@ -516,8 +511,7 @@ Popup {
             loadingAnimation.visible = true
 
             AppInfoController.lastTranslationLanguage
-                    = sourceLanguageComboBox.getPropertyOfSelectedItem("code")
-
+                    = targetLanguageComboBox.getPropertyOfSelectedItem("code")
             let sourceLang = sourceLanguageComboBox.getPropertyOfSelectedItem(
                     "code")
             let targetLang = targetLanguageComboBox.getPropertyOfSelectedItem(

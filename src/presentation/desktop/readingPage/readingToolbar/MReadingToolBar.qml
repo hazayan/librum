@@ -281,7 +281,7 @@ Pane {
 
                     // Only wanna do this the first time
                     if (firstTime == 0) {
-                        zoomComboBox.setDefaultItem(zoomComboBox.text)
+                        zoomComboBox.selectItemByValue(zoomComboBox.text)
                         firstTime++
                     }
                 }

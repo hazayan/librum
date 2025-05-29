@@ -217,7 +217,7 @@ Item {
         selectionPopup.close()
     }
 
-    function setDefaultItem(itemName, propertyName) {
+    function selectItemByValue(itemName, propertyName) {
         if (propertyName === undefined) {
             propertyName = contentPropertyName
         }

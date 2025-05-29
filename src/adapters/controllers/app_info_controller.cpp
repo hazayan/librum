@@ -141,10 +141,11 @@ bool AppInfoController::isOnline() const
 QString AppInfoController::getLastTranslationLanguage() const
 {
     QSettings settings;
-    if(!settings.contains("lastTranslationLanguage"))
+    QString last = settings.value("lastTranslationLanguage").toString();
+    if(last.isNull() || last.isEmpty())
         return settings.value("language").toString();
 
-    return settings.value("lastTranslationLanguage").toString();
+    return last;
 }
 
 void AppInfoController::setLastTranslationLanguage(QString& language)

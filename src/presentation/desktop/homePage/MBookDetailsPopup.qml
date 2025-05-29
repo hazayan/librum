@@ -504,7 +504,7 @@ Popup {
                 })
 
             if (Globals.selectedBook.language !== "")
-                languageComboBox.setDefaultItem(Globals.selectedBook.language)
+                languageComboBox.selectItemByValue(Globals.selectedBook.language)
         }
 
         function unloadData() {
