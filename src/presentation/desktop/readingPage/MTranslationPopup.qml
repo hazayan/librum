@@ -289,7 +289,7 @@ Popup {
         Pane {
             id: inputContainer
             Layout.fillWidth: true
-            Layout.preferredHeight: inputFlick.height
+            Layout.preferredHeight: inputFlick.height + topPadding * 2
             Layout.topMargin: 12
             rightPadding: 16
             clip: true
@@ -302,9 +302,10 @@ Popup {
 
             Flickable {
                 id: inputFlick
-                height: Math.min(Math.max(inputField.implicitHeight,
-                                          internal.minTextHeight),
-                                 internal.maxTextHeight)
+                height: Math.min(
+                            Math.max(
+                                inputField.implicitHeight + inputContainer.topPadding * 2,
+                                internal.minTextHeight), internal.maxTextHeight)
                 width: parent.width
                 contentHeight: inputField.contentHeight
                 clip: true
@@ -361,7 +362,7 @@ Popup {
         Pane {
             id: translationContainer
             Layout.fillWidth: true
-            Layout.preferredHeight: translationFlick.height
+            Layout.preferredHeight: translationFlick.height + topPadding * 2
             Layout.topMargin: 6
             rightPadding: 16
             clip: true
@@ -399,7 +400,6 @@ Popup {
                     focus: true
                     text: root.translation
                     font.pointSize: Fonts.size12
-                    bottomPadding: 20
                     color: Style.colorText
                     readOnly: true
                     wrapMode: Text.WordWrap
@@ -497,13 +497,13 @@ Popup {
             fontWeight: Font.Medium
             fontSize: Fonts.size12
 
-            onClicked: ;
+            onClicked: internal.sendTranslationRequest()
         }
     }
 
     QtObject {
         id: internal
-        property int maxTextHeight: 240
+        property int maxTextHeight: baseRoot.height / 4
         property int minTextHeight: 120
 
         function sendTranslationRequest() {
