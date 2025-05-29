@@ -43,7 +43,7 @@ enum class APPLICATION_EXPORT ErrorCode
     NameTooLong,  // 24
     AutomaticLoginFailed,  // 25
     TranslationLimitReached,  // 26
-    TranslationRequestTooLong,  // 26
+    TranslationRequestTooLong,  // 27
 };
 
 Q_ENUM_NS(ErrorCode)

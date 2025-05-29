@@ -217,14 +217,14 @@ Item {
         selectionPopup.close()
     }
 
-    function selectItemByValue(itemName, propertyName) {
+    function selectItemByValue(itemName, propertyName, initialSelect = false) {
         if (propertyName === undefined) {
             propertyName = contentPropertyName
         }
 
         for (var i = 0; i < selectionPopup.model.count; i++) {
             if (selectionPopup.model.get(i)[propertyName] === itemName) {
-                selectItem(i)
+                selectItem(i, initialSelect)
                 return
             }
         }

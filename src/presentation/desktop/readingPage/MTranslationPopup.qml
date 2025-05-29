@@ -30,7 +30,8 @@ Popup {
 
         let lastLang = AppInfoController.lastTranslationLanguage
 
-        targetLanguageComboBox.selectItemByValue(lastLang.toUpperCase(), "code")
+        targetLanguageComboBox.selectItemByValue(lastLang.toUpperCase(),
+                                                 "code", true)
         internal.sendTranslationRequest()
     }
 
@@ -178,32 +179,29 @@ Popup {
             loadingAnimation.visible = false
         }
 
-        function onTranslationRequestTooLong() {
-            loadingAnimation.visible = false
+        function onTranslationErrorOccured() {
+            loadingAnimation.visible = true
+            errorItem.visible = true
+            errorText.text = qsTr(
+                        'Opps! Something went wrong. Please try again.')
         }
 
         function onTranslationLimitReached() {
             loadingAnimation.visible = false
+            errorItem.visible = true
+            //: Make sure that the words make a valid sentence
+            errorText.text = qsTr('You have reached your daily limit.') + ' '
+                    + ' <a href="update" style="color: ' + Style.colorBasePurple
+                    + '; text-decoration: none;">' + qsTr(
+                        'Upgrade') + '</a> ' + qsTr('to continue.')
         }
 
-        function onTranslationErrorOccured() {
+        function onTranslationRequestTooLong() {
             loadingAnimation.visible = false
+            errorItem.visible = true
+            errorText.text = qsTr(
+                        'Oops! The text is too long. Please shorten your selection.')
         }
-
-        // function onExplanationLimitReached() {
-        //     errorItem.visible = true
-        //     //: Make sure that the words make a valid sentence
-        //     errorText.text = qsTr('You have reached your daily limit.') + ' '
-        //             + ' <a href="update" style="color: ' + Style.colorBasePurple
-        //             + '; text-decoration: none;">' + qsTr(
-        //                 'Upgrade') + '</a> ' + qsTr('to continue.')
-        // }
-
-        // function onExplanationRequestTooLong() {
-        //     errorItem.visible = true
-        //     errorText.text = qsTr(
-        //                 'Oops! The text is too long. Please shorten your selection.')
-        // }
     }
 
     ColumnLayout {
@@ -249,7 +247,10 @@ Popup {
                 allowUnselectingItems: false
 
                 model: langModel
-                onItemChanged: sourceLanguageComboBox.closePopup()
+                onItemChanged: {
+                    translateButton.active = true
+                    sourceLanguageComboBox.closePopup()
+                }
             }
 
             Item {
@@ -282,7 +283,10 @@ Popup {
                 allowUnselectingItems: false
 
                 model: langModel
-                onItemChanged: targetLanguageComboBox.closePopup()
+                onItemChanged: {
+                    translateButton.active = true
+                    targetLanguageComboBox.closePopup()
+                }
             }
         }
 
@@ -419,9 +423,9 @@ Popup {
                     Image {
                         id: errorIllustration
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: -30
+                        Layout.topMargin: -16
                         source: Icons.attentionPurple
-                        sourceSize.width: 270
+                        sourceSize.width: 160
                         fillMode: Image.PreserveAspectFit
                     }
 
@@ -432,7 +436,7 @@ Popup {
                         text: ""
                         color: Style.colorTitle
                         font.weight: Font.Medium
-                        font.pointSize: Fonts.size14
+                        font.pointSize: Fonts.size13
                         onLinkActivated: Qt.openUrlExternally(
                                              AppInfoController.website + "/pricing")
 
@@ -485,29 +489,31 @@ Popup {
         }
 
         MButton {
-            id: applyButton
+            id: translateButton
             Layout.preferredWidth: 124
             Layout.preferredHeight: 38
             Layout.topMargin: 8
             Layout.alignment: Qt.AlignLeft
-            borderWidth: 0
-            backgroundColor: Style.colorBasePurple
+            borderWidth: active ? 0 : 1
+            backgroundColor: active ? Style.colorBasePurple : "transparent"
             text: qsTr("Translate")
-            textColor: Style.colorFocusedButtonText
+            textColor: active ? Style.colorFocusedButtonText : Style.colorUnfocusedButtonText
             fontWeight: Font.Medium
             fontSize: Fonts.size12
 
-            onClicked: internal.sendTranslationRequest()
+            onClicked: if (active)
+                           internal.sendTranslationRequest()
         }
     }
 
     QtObject {
         id: internal
         property int maxTextHeight: baseRoot.height / 4
-        property int minTextHeight: 120
+        property int minTextHeight: 140
 
         function sendTranslationRequest() {
             root.translation = ""
+            errorItem.visible = false
             loadingAnimation.visible = true
 
             AppInfoController.lastTranslationLanguage
@@ -518,6 +524,8 @@ Popup {
                     "code")
 
             AiToolsController.getTranslation(root.input, sourceLang, targetLang)
+
+            translateButton.active = false
         }
     }
 }
