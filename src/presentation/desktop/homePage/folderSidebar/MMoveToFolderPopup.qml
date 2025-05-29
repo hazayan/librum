@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.impl
 import CustomComponents
 import Librum.controllers
 import Librum.style
@@ -113,7 +114,7 @@ Popup {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 0
 
-                IconImage {
+                ColorImage {
                     Layout.preferredWidth: implicitWidth
                     Layout.leftMargin: 22 * 1.1 + 2
                     Layout.alignment: Qt.AlignVCenter

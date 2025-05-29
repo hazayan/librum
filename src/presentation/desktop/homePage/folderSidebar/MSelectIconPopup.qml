@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.impl
 import Librum.fonts
 import Librum.style
 import Librum.icons
@@ -143,7 +144,7 @@ Popup {
                 border.color: Style.colorContainerBorder
                 color: "transparent"
 
-                IconImage {
+                ColorImage {
                     id: iconImage
                     anchors.centerIn: parent
                     sourceSize.width: 26

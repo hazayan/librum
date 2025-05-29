@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.impl
 import CustomComponents
 import Librum.style
 import Librum.fonts
@@ -69,7 +70,7 @@ Pane {
                 Layout.fillWidth: true
             }
 
-            IconImage {
+            ColorImage {
                 id: closeIcon
                 source: Icons.xIcon
                 Layout.alignment: Qt.AlignVCenter

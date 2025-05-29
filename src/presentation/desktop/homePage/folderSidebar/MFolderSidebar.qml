@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.impl
 import Librum.controllers
 import Librum.style
 import Librum.icons
@@ -279,7 +280,7 @@ Item {
                                 }
                             }
 
-                            IconImage {
+                            ColorImage {
                                 id: icon
                                 Layout.preferredWidth: implicitWidth
                                 Layout.leftMargin: treeNode.hasChildren ? indicator.width * 0.1 : indicator.width * 1.1 + depth * treeView.indent + 2

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQuick.Controls.impl
 import Librum.fonts
 import Librum.style
 import Librum.icons
@@ -165,7 +166,7 @@ Popup {
                             Layout.preferredHeight: 1
                         }
 
-                        IconImage {
+                        ColorImage {
                             Layout.alignment: Qt.AlignVCenter
                             visible: optionButtonRoot.optionButtonIcon !== ""
                             source: optionButtonRoot.optionButtonIcon
