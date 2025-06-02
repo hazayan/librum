@@ -39,6 +39,10 @@ qt_add_executable(librum
     ${QM_FILES}
 )
 
+# Ensure the mupdf target is built before to avoid the mupdf build command
+# to be executed twice
+add_dependencies(librum mupdf_generation_target)
+
 # Set WIN32 for windows to avoid console getting opened on start on windows
 if(WIN32)
     set_target_properties(librum PROPERTIES WIN32_EXECUTABLE true)

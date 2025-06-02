@@ -147,26 +147,32 @@ else()
 endif()
 
 # Build mupdf
-add_custom_target(mupdf
-   COMMAND ${CMAKE_COMMAND} -E env
+add_custom_command(
+    OUTPUT ${MUPDF_OUTPUT}
+    COMMAND ${CMAKE_COMMAND} -E env
         $<$<NOT:$<STREQUAL:"${CC_COMMAND}","">>:CC=${CC_COMMAND}>
         $<$<NOT:$<STREQUAL:"${CXX_COMMAND}","">>:CXX=${CXX_COMMAND}>
         "USE_SYSTEM_LIBJPEG=${USE_SYSTEM_LIBJPEG_VALUE}"
         "USE_SONAME=no"
         ${MUPDF_BUILD_COMMAND}
-   BYPRODUCTS ${MUPDF_OUTPUT}
-   WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/libs/mupdf
-   COMMENT "Building mupdf (This takes a while) ..."
+    DEPENDS ${PROJECT_SOURCE_DIR}/libs/mupdf/scripts/mupdfwrap.py
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}/libs/mupdf
+    COMMENT "Building mupdf (This may take a while) ..."
+)
+
+# We are using an intermediary target to be able to attach the POST BUILD
+# commands below and ensure there are no issues with parallel builds.
+add_custom_target(mupdf_generation_target
+    DEPENDS ${MUPDF_OUTPUT}
 )
 
 # Copy the mutool executable to the build directory
 if(BUILD_MUTOOL)
     add_custom_command(
-        TARGET mupdf POST_BUILD
+        TARGET mupdf_generation_target POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy
                 "${MUPDF_OUTPUT_DIR}/mutool${EXECUTABLE_EXTENSION}"
                 "${PROJECT_BINARY_DIR}/mutool${EXECUTABLE_EXTENSION}"
-        BYPRODUCTS "${PROJECT_BINARY_DIR}/mutool${EXECUTABLE_EXTENSION}"
         DEPENDS ${MUPDF_OUTPUT}
     )
 endif()
@@ -174,7 +180,7 @@ endif()
 #Copy the mupdf dlls to the build directory for windows
 if(WIN32)
     add_custom_command(
-      TARGET mupdf POST_BUILD
+      TARGET mupdf_generation_target POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
               "${MUPDF_OUTPUT_DIR}/mupdfcpp64.dll"
               "${PROJECT_BINARY_DIR}/mupdfcpp64.dll"
@@ -191,7 +197,9 @@ add_library(application
                     ${application_SRC}
 )
 
-add_dependencies(application mupdf) # Ensure the mupdf target is built before the application target
+# Ensure the mupdf target is built before to avoid the mupdf build command
+# to be executed twice
+add_dependencies(application mupdf_generation_target)
 
 target_compile_definitions(application PRIVATE APPLICATION_LIBRARY)
 
