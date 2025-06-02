@@ -1,3 +1,4 @@
+#pragma once
 #include <QPoint>
 #include <QQuickItem>
 #include <QString>
@@ -19,20 +20,10 @@ namespace cpp_elements
 class PRESENTATION_EXPORT PageView : public QQuickItem
 {
     Q_OBJECT
-    Q_PROPERTY(adapters::IBookController* bookController WRITE setBookController
-                   CONSTANT)
-    Q_PROPERTY(
-        int implicitWidth READ getImplicitWidth NOTIFY implicitWidthChanged)
-    Q_PROPERTY(
-        int implicitHeight READ getImplicitHeight NOTIFY implicitHeightChanged)
-    Q_PROPERTY(int pageNumber READ getPageNumber WRITE setPageNumber CONSTANT)
-    Q_PROPERTY(bool colorInverted WRITE setColorInverted)
-    Q_PROPERTY(float yOffset READ getYOffset CONSTANT)
-    Q_PROPERTY(
-        bool includeNewLinesInCopiedText WRITE setIncludeNewLinesInCopiedText)
 
 public:
-    PageView();
+    PageView(QObject* parent, adapters::IBookController* bookController,
+             int pageNumber, float zoom, qreal devicePixelRatio);
 
     int getImplicitWidth() const;
     int getImplicitHeight() const;
@@ -43,12 +34,8 @@ public:
     void setDisableHoverEvents(bool newDisableHoverEvents);
 
     int getPageNumber() const;
-    void setPageNumber(int newCurrentPage);
     void setColorInverted(bool newColorInverted);
-
     void setIncludeNewLinesInCopiedText(bool newIncludeNewLinesInCopiedText);
-
-    void setBookController(adapters::IBookController* newBookController);
 
     Q_INVOKABLE void copySelectedText();
     Q_INVOKABLE void copyHighlightedText(const QString& uuid);

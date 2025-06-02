@@ -21,6 +21,10 @@ else()
         desktop/modules/CppElements/key_sequence_recorder.hpp
         desktop/modules/CppElements/page_view.cpp
         desktop/modules/CppElements/page_view.hpp
+        desktop/modules/CppElements/document_view.cpp
+        desktop/modules/CppElements/document_view.hpp
+        desktop/modules/CppElements/test_rect.cpp
+        desktop/modules/CppElements/test_rect.hpp
     )
 endif()
 
@@ -30,6 +34,8 @@ add_library(presentation
                     ${QML_SOURCE_QRC_PATH}
                     qmlSourcesGeneral.qrc
                     ${CPP_FILES}
+                    desktop/modules/CppElements/document_view.hpp desktop/modules/CppElements/document_view.cpp
+                    desktop/modules/CppElements/test_rect.hpp desktop/modules/CppElements/test_rect.cpp
 )
 
 

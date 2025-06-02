@@ -31,6 +31,7 @@
 #include "i_user_service.hpp"
 #include "library_proxy_model.hpp"
 #include "page_view.hpp"
+#include "document_view.hpp"
 #include "setting_groups.hpp"
 #include "setting_keys.hpp"
 #include "shortcuts_proxy_model.hpp"
@@ -91,6 +92,7 @@ int main(int argc, char* argv[])
     qRegisterMetaType<adapters::dtos::WordTypeDto>();
     qRegisterMetaType<adapters::dtos::WordDefinitionDto>();
     qmlRegisterType<cpp_elements::PageView>("Librum.elements", 1, 0, "PageView");
+    qmlRegisterType<cpp_elements::DocumentView>("Librum.elements", 1, 0, "DocumentView");
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     qmlRegisterType<cpp_elements::KeySequenceRecorder>("Librum.elements", 1, 0, "KeySequenceRecorder");

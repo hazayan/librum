@@ -23,61 +23,26 @@ using namespace application::core;
 namespace cpp_elements
 {
 
-cpp_elements::PageView::PageView()
+cpp_elements::PageView::PageView(QObject* parent,
+                                 IBookController* bookController,
+                                 int pageNumber, float zoom,
+                                 qreal devicePixelRatio) :
+    m_bookController(bookController),
+    m_pageNumber(pageNumber)
 {
+    setParent(parent);
+
     setFlag(QQuickItem::ItemHasContents, true);
     setAcceptedMouseButtons(Qt::AllButtons);
     setAcceptHoverEvents(true);
 
     m_tripleClickTimer.setInterval(400);
     m_tripleClickTimer.setSingleShot(true);
-}
-
-void PageView::setBookController(IBookController* newBookController)
-{
-    m_bookController = newBookController;
 
     m_pageController = std::make_unique<PageController>(
-        m_bookController->getFzDocument(), m_pageNumber,
-        window()->devicePixelRatio());
-    m_pageController->setZoom(m_bookController->getZoom());
+        m_bookController->getFzDocument(), m_pageNumber, devicePixelRatio);
 
-    // Setup connections to the BookController
-    connect(m_bookController, &IBookController::zoomChanged, this,
-            &PageView::updateZoom);
-
-    connect(m_bookController, &IBookController::selectText, this,
-            [this](int pageNumber, QPointF left, QPointF right)
-            {
-                if(pageNumber != m_pageNumber)
-                    return;
-
-                // The offsets are only valid once the page was rendered, make
-                // sure that it is always rendered first.
-                m_pageController->renderPage();
-
-                auto xOffset = m_pageController->getXOffset();
-                auto yOffset = m_pageController->getYOffset();
-                left = QPoint(left.x() - xOffset, left.y() - yOffset);
-                right = QPoint(right.x() - xOffset, right.y() - yOffset);
-
-                // The points received from this signal are relative to a zoom
-                // of 1, but all of the methods in this class handle points as
-                // if they have the currentZoom applied, so we need to scale it.
-                // We need to divide by the dpr since the lower level methods
-                // expect the caller not to know anything about the dpr, but the
-                // current zoom we get from the page controller is zoom * dpr.
-                // Thus we need to reset it to the zoom without the dpr.
-                auto zoom = m_pageController->getZoom();
-                auto dpr = window()->devicePixelRatio();
-                left = utils::scalePointToCurrentZoom(left, 1, zoom / dpr);
-                right = utils::scalePointToCurrentZoom(right, 1, zoom / dpr);
-
-                m_selectionStart = left;
-                m_selectionEnd = right;
-
-                createSelection();
-            });
+    m_pageController->setZoom(zoom);
 }
 
 int PageView::getImplicitWidth() const
@@ -93,11 +58,6 @@ int PageView::getImplicitHeight() const
 int PageView::getPageNumber() const
 {
     return m_pageNumber;
-}
-
-void PageView::setPageNumber(int newCurrentPage)
-{
-    m_pageNumber = newCurrentPage;
 }
 
 void PageView::updateZoom(float newZoom)
