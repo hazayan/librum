@@ -1,8 +1,8 @@
 #include "document_view.hpp"
+#include <QPair>
 #include <QRandomGenerator>
 #include <QSGImageNode>
 #include <QSGSimpleRectNode>
-#include "test_rect.hpp"
 
 namespace cpp_elements
 {
@@ -14,6 +14,20 @@ DocumentView::DocumentView()
     setAcceptHoverEvents(true);
     setFlag(QQuickItem::ItemAcceptsInputMethod, true);
 
+    m_contentItem = new QQuickItem(this);
+    m_contentItem->setParentItem(this);
+    m_contentItem->setY(0);
+
+    // Ensure the content item has the same width as the document view
+    connect(this, &QQuickItem::implicitWidthChanged, this,
+            [this]()
+            {
+                m_contentItem->setWidth(implicitWidth());
+                emit contentWidthChanged();
+            });
+    connect(m_contentItem, &QQuickItem::heightChanged, this,
+            &DocumentView::contentHeightChanged);
+
     // We need to find a good value for this after rendering the first
     // page I assume
     setImplicitWidth(500);
@@ -23,8 +37,13 @@ void DocumentView::setBookController(
     adapters::IBookController* newBookController)
 {
     m_bookController = newBookController;
+    if(!setupDefaultPageHeight())
+    {
+        qWarning() << "Could not determine the default page size.";
+        return;
+    }
 
-    updatePages();
+    redrawPages();
 }
 
 QSGNode* DocumentView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
@@ -35,107 +54,257 @@ QSGNode* DocumentView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
 void DocumentView::wheelEvent(QWheelEvent* event)
 {
     int deltaY = event->angleDelta().y();
-    if(m_controlPressed)
-    {
-        handleZoom(deltaY);
-    }
+    int deltaX = event->angleDelta().x();
+    if(event->modifiers() & Qt::ControlModifier)
+        handleZoom(deltaY, ZoomMode::Mouse);
     else
-    {
-        handleScroll(deltaY);
-    }
+        handleScroll(deltaY, deltaX);
 
     event->accept();
-    update();
 }
 
 void DocumentView::keyPressEvent(QKeyEvent* event)
 {
-    if(event->key() == Qt::Key_Control)
-        m_controlPressed = true;
-
-    event->accept();
-}
-
-void DocumentView::keyReleaseEvent(QKeyEvent* event)
-{
-    if(event->key() == Qt::Key_Control)
-        m_controlPressed = false;
-
-    event->accept();
-}
-
-void DocumentView::updatePages()
-{
-    QList<int> pagesIndecies = pageIndiciesToRender();
-
-    for(int i = pagesIndecies.first(); i < pagesIndecies.size(); ++i)
+    switch(event->key())
     {
-        TestRect* page = new TestRect(this);
-        page->setParentItem(this);
-        page->setY(0);
-        page->setWidth(page->implicitWidth());
+    case Qt::Key_Up:
+        handleScroll(20, 0);
+        break;
+    case Qt::Key_Down:
+        handleScroll(-20, 0);
+        break;
+    case Qt::Key_Minus:
+        if(event->modifiers() & Qt::ControlModifier)
+            handleZoom(-15, ZoomMode::Keyboard);
+        break;
+    default:
+        break;
+    }
+
+    // Need to handle CTRL + differently bc. it Key_Plus isn't recognized
+    if(event->key() == Qt::Key_Plus || event->nativeVirtualKey() == 187)
+    {
+        handleZoom(15, ZoomMode::Keyboard);
+    }
+
+    event->accept();
+}
+
+void DocumentView::redrawPages()
+{
+    setFocus(true);
+    QPair<int, int> pageSpan = getPageSpanToRender();
+
+    // Display pages
+    qreal widestPage = 0;
+    for(int i = pageSpan.first; i <= pageSpan.second; ++i)
+    {
+        PageView* page = m_activePages.value(i);
+        if(page == nullptr)
+        {
+            page = new PageView(m_contentItem, m_bookController, i,
+                                m_currentZoom, window()->devicePixelRatio());
+            page->setParentItem(m_contentItem);
+            m_activePages.tryEmplace(i, page);
+        }
+
+        page->setY(i * (m_pageHeight + m_spacing) * m_currentZoom);
+        page->setZoom(m_currentZoom);
+        page->setWidth(page->getImplicitWidth());
         page->setHeight(page->getImplicitHeight());
 
-        // PageView* page = new PageView(this, m_bookController, i,
-        // m_currentZoom,
-        //                               window()->devicePixelRatio());
-        // page->setParentItem(this);
-        // page->setY(0);
-        // int x = page->getImplicitWidth();
-        // int y = page->getImplicitHeight();
-        // page->setWidth(page->implicitWidth());
-        // page->setHeight(page->getImplicitHeight());
+        if(page->width() > widestPage)
+            widestPage = page->width();
     }
+
+    // Adjust the window width
+    if(widestPage != implicitWidth())
+        setImplicitWidth(widestPage);
+
+    // Delete unused pages
+    for(auto it = m_activePages.begin(); it != m_activePages.end();)
+    {
+        if(it.key() < pageSpan.first || it.key() > pageSpan.second)
+        {
+            delete it.value();
+            it = m_activePages.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    };
+
+    update();
 }
 
-QList<int> DocumentView::pageIndiciesToRender() const
+bool DocumentView::setupDefaultPageHeight()
 {
-    // This means no page was rendered yet, we have to render the first
-    // one to get the height for the next pages
+    // We take the first page to determine the page height, not the cover
+    auto page = std::make_unique<PageView>(
+        this, m_bookController, 1, m_currentZoom, window()->devicePixelRatio());
+    m_pageHeight = page->getImplicitHeight();
     if(m_pageHeight == 0)
-        return { 0 };
+        return false;
 
-    return { 2 };
+    m_contentItem->setHeight(m_pageHeight * m_currentZoom *
+                             m_bookController->getPageCount());
+    return true;
 }
 
-void DocumentView::handleScroll(int deltaY)
+QPair<int, int> DocumentView::getPageSpanToRender() const
 {
-    deltaY *= -1;  // To get the correct scroll direction
+    if(m_pageHeight == 0)
+        return {};
 
-    int maxContentY =
-        (m_activePages.first()->getImplicitHeight() * m_currentZoom + 15) *
-            m_activePages.size() -
-        height();
-    if(m_contentY + deltaY > maxContentY)
-        m_contentY = maxContentY;
-    else if(m_contentY + deltaY < 0)
-        m_contentY = 0;
+    int first = m_contentY / ((m_pageHeight + m_spacing) * m_currentZoom);
+    int pageStep = (m_pageHeight + m_spacing) * m_currentZoom;
+    int last = ((m_contentY + height()) + pageStep - 1) / pageStep - 1;
+
+    // For the case that contentY perfectly aligns with the book
+    // start (0) or end, we need to add or subtract 1
+    if(last >= m_bookController->getPageCount())
+        last = m_bookController->getPageCount() - 1;
+    else if(m_contentY == 0)
+        last += 1;
+
+    return { first, last };
+}
+
+void DocumentView::handleScroll(int deltaY, int deltaX)
+{
+    // To get the correct scroll direction
+    deltaY *= -1;
+    deltaX *= -1;
+
+    moveX(deltaX);
+    m_contentItem->setX(-m_contentX);
+    emit contentXChanged();
+
+    moveY(deltaY);
+    m_contentItem->setY(-m_contentY);
+    emit contentYChanged();
+
+    redrawPages();
+}
+
+void DocumentView::moveX(int amount)
+{
+    int maxContentX = m_contentItem->width() - width();
+    if(m_contentX + amount > maxContentX)
+        m_contentX = maxContentX;
+    else if(m_contentX + amount < 0)
+        m_contentX = 0;
     else
-        m_contentY += deltaY;
-
-    update();
+        m_contentX += amount;
 }
 
-void DocumentView::handleZoom(int deltaY)
+void DocumentView::moveY(int amount)
 {
-    double oldZoom = m_currentZoom;
-    m_currentZoom *= (deltaY > 0 ? 1 + m_zoomFactor : 1 - m_zoomFactor);
-    m_contentY = computeNewContentYForZoom(oldZoom, m_currentZoom);
-    update();
+    m_contentY += amount;
+
+    ensureInBounds();
 }
 
-double DocumentView::computeNewContentYForZoom(double oldZoom,
-                                               double newZoom) const
+void DocumentView::handleZoom(int deltaY, ZoomMode zoomMode)
 {
-    // We want to move towards the mouse position
-    auto mousePos = this->mapFromGlobal(QCursor::pos());
-    qreal virtualMouseY = m_contentY + mousePos.y();
-    return virtualMouseY * (newZoom / oldZoom) - mousePos.y();
+    double newZoom =
+        m_currentZoom * (deltaY > 0 ? 1 + m_zoomFactor : 1 - m_zoomFactor);
+    double scale = newZoom / m_currentZoom;
+    m_currentZoom = newZoom;
+
+    if(zoomMode == ZoomMode::Keyboard)
+        m_contentY = contentYForCenterZoom(scale);
+    else if(zoomMode == ZoomMode::Mouse)
+        m_contentY = contentYForMouseZoom(scale);
+
+    if(m_contentY < 0)
+        m_contentY = 0;
+
+    m_contentItem->setHeight((m_pageHeight + m_spacing) *
+                                 m_bookController->getPageCount() *
+                                 m_currentZoom -
+                             m_spacing);
+    m_contentItem->setY(-m_contentY);
+    emit contentYChanged();
+
+    ensureInBounds();
+    redrawPages();
 }
 
-void DocumentView::updateImplicitWidth(int newWidth)
+double DocumentView::contentYForCenterZoom(double scale)
 {
-    setImplicitWidth(newWidth);
+    double centerY = m_contentY + height() / 2;
+    double newCenterY = centerY * scale;
+    return newCenterY - height() / 2;
+}
+
+double DocumentView::contentYForMouseZoom(double scale)
+{
+    QPointF localPos = mapFromGlobal(QCursor::pos());
+
+    double virtualMouseY = m_contentY + localPos.y();
+    double newVirtualMouseY = virtualMouseY * scale;
+    return newVirtualMouseY - localPos.y();
+}
+
+void DocumentView::ensureInBounds()
+{
+    int totalContentHeight = (m_pageHeight + m_spacing) * m_currentZoom *
+                                 m_bookController->getPageCount() -
+                             m_spacing * m_currentZoom;
+    int maxContentY = totalContentHeight - height();
+    if(m_contentY > maxContentY)
+        m_contentY = maxContentY;
+    else if(m_contentY < 0)
+        m_contentY = 0;
+
+    m_contentItem->setY(-m_contentY);
+    emit contentYChanged();
+}
+
+long DocumentView::getContentHeight() const
+{
+    return m_contentItem->height();
+}
+
+long DocumentView::getContentY() const
+{
+    return m_contentY;
+}
+
+void DocumentView::setContentY(long newContentY)
+{
+    if(m_contentY == newContentY)
+        return;
+
+    m_contentY = newContentY;
+    m_contentItem->setY(-m_contentY);
+    emit contentYChanged();
+
+    redrawPages();
+}
+
+long DocumentView::getContentX() const
+{
+    return m_contentX;
+}
+
+void DocumentView::setContentX(long newContentX)
+{
+    if(m_contentX == newContentX)
+        return;
+
+    m_contentX = newContentX;
+    m_contentItem->setX(-m_contentX);
+    emit contentXChanged();
+
+    redrawPages();
+}
+
+long DocumentView::getContentWidth() const
+{
+    return m_contentItem->width();
 }
 
 }  // namespace cpp_elements

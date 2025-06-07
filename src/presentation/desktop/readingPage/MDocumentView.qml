@@ -51,9 +51,73 @@ Pane {
   DocumentView {
     id: documentView
     height: parent.height
+    width: Math.min(implicitWidth, parent.width)
     anchors.centerIn: parent
-    width: Math.min(root.width * 0.9, implicitWidth)
     bookController: root.bookController
+    clip: true
+
+    Component.onCompleted: documentView.forceActiveFocus()
+  }
+
+  ScrollBar {
+    id: verticalScrollbar
+    width: pressed ? 14 : 12
+    hoverEnabled: true
+    active: true
+    policy: ScrollBar.AlwaysOn
+    orientation: Qt.Vertical
+    size: documentView.height / documentView.contentHeight
+    minimumSize: 0.04
+    position: documentView.contentY / documentView.contentHeight
+    onPositionChanged: if (pressed)
+                         documentView.contentY = position * documentView.contentHeight
+    anchors.top: parent.top
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    horizontalPadding: 4
+
+    contentItem: Rectangle {
+      color: Style.colorScrollBarHandle
+      opacity: verticalScrollbar.pressed ? 0.8 : 1
+      radius: 4
+    }
+
+    background: Rectangle {
+      implicitWidth: 26
+      implicitHeight: 200
+      color: verticalScrollbar.pressed
+             || verticalScrollbar.hovered ? Style.colorContainerBackground : "transparent"
+    }
+  }
+
+  ScrollBar {
+    id: horizontalScrollbar
+    height: hovered ? 12 : 10
+    hoverEnabled: true
+    active: true
+    policy: ScrollBar.AlwaysOn
+    visible: documentView.contentWidth > documentView.width
+    orientation: Qt.Horizontal
+    size: documentView.width / documentView.contentWidth
+    minimumSize: 0.04
+    position: documentView.contentX / documentView.contentWidth
+    onPositionChanged: documentView.contentX = position * documentView.contentWidth
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.bottom: parent.bottom
+    horizontalPadding: 4
+
+    contentItem: Rectangle {
+      color: Style.colorScrollBarHandle
+      opacity: horizontalScrollbar.pressed ? 0.8 : 1
+      radius: 4
+    }
+
+    background: Rectangle {
+      implicitWidth: 26
+      implicitHeight: 200
+      color: "transparent"
+    }
   }
 
   MSelectionOptionsPopup {

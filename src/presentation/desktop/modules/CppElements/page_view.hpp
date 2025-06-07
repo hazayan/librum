@@ -28,6 +28,8 @@ public:
     int getImplicitWidth() const;
     int getImplicitHeight() const;
 
+    void setZoom(float newZoom);
+
     float getYOffset() const;
 
     bool disableHoverEvents() const;
@@ -36,6 +38,7 @@ public:
     int getPageNumber() const;
     void setColorInverted(bool newColorInverted);
     void setIncludeNewLinesInCopiedText(bool newIncludeNewLinesInCopiedText);
+    void syncChanges();
 
     Q_INVOKABLE void copySelectedText();
     Q_INVOKABLE void copyHighlightedText(const QString& uuid);
@@ -53,9 +56,6 @@ public:
 
 signals:
     void mouseHoverMoved();
-
-private slots:
-    void updateZoom(float newZoom);
 
 protected:
     void geometryChange(const QRectF& newGeometry,

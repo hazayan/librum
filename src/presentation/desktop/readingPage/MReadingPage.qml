@@ -34,30 +34,17 @@ Page {
         onTriggered: internal.saveCurrentPage()
     }
 
-    Shortcut {
-        id: zoomIn
-        sequences: [SettingsController.shortcuts.ZoomIn]
-        onActivated: documentView.changeZoomBy(1.13)
-    }
+    // Shortcut {
+    //     id: zoomIn
+    //     sequences: [SettingsController.shortcuts.ZoomIn]
+    //     onActivated: documentView.changeZoomBy(1.13)
+    // }
 
-    Shortcut {
-        id: zoomOut
-        sequences: [SettingsController.shortcuts.ZoomOut]
-        onActivated: documentView.changeZoomBy(0.87)
-    }
-
-    Shortcut {
-        id: flickUp
-        sequences: [SettingsController.shortcuts.MoveUp]
-        onActivated: documentView.flick("up")
-    }
-
-    Shortcut {
-        id: flickDown
-        sequences: [SettingsController.shortcuts.MoveDown]
-        onActivated: documentView.flick("down")
-    }
-
+    // Shortcut {
+    //     id: zoomOut
+    //     sequences: [SettingsController.shortcuts.ZoomOut]
+    //     onActivated: documentView.changeZoomBy(0.87)
+    // }
     Shortcut {
         id: nextPage
         sequences: [SettingsController.shortcuts.NextPage]

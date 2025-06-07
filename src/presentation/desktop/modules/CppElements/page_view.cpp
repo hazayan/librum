@@ -60,7 +60,7 @@ int PageView::getPageNumber() const
     return m_pageNumber;
 }
 
-void PageView::updateZoom(float newZoom)
+void PageView::setZoom(float newZoom)
 {
     auto oldZoom = m_pageController->getZoom();
     m_pageController->setZoom(newZoom);

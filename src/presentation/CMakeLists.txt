@@ -34,8 +34,6 @@ add_library(presentation
                     ${QML_SOURCE_QRC_PATH}
                     qmlSourcesGeneral.qrc
                     ${CPP_FILES}
-                    desktop/modules/CppElements/document_view.hpp desktop/modules/CppElements/document_view.cpp
-                    desktop/modules/CppElements/test_rect.hpp desktop/modules/CppElements/test_rect.cpp
 )
 
 
