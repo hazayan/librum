@@ -276,8 +276,7 @@ void DocumentView::loadDefaultBookData()
 
     // Calculate content y
     auto newContentY = m_bookController->getCurrentPage() *
-                           (m_pageHeight + m_spacing) * m_currentZoom -
-                       m_spacing * m_currentZoom;
+                       (m_pageHeight + m_spacing) * m_currentZoom;
     setContentY(newContentY);
 }
 
