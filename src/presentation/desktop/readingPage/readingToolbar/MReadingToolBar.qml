@@ -28,6 +28,7 @@ Pane {
     signal currentPageButtonClicked
     signal fullScreenButtonClicked
     signal optionsPopupVisibileChanged
+    signal zoomChanged(real zoom)
 
     implicitHeight: 48
     padding: 8
@@ -266,35 +267,23 @@ Pane {
                 }
             }
 
-            // Need to run a timer to create the binding, since the combobox does not set the text correctly
-            // when trying to just assign it during onCompleted
-            Component.onCompleted: zoomAssignment.start()
-            Timer {
-                id: zoomAssignment
-                property int firstTime: 0
-
-                interval: 5
-                onTriggered: {
-                    zoomComboBox.text = Qt.binding(function () {
-                        return Math.round(BookController.zoom * 100) + "%"
-                    })
-
-                    // Only wanna do this the first time
-                    if (firstTime == 0) {
-                        zoomComboBox.selectItemByValue(zoomComboBox.text)
-                        firstTime++
-                    }
-                }
-            }
-
-            // Remove % sign from text
             onItemChanged: {
                 if (text === "")
                     return
 
-                BookController.zoom = zoomComboBox.text.substring(
-                            0, zoomComboBox.text.length - 1) / 100
-                zoomAssignment.start() // Force rebinding
+                // Remove % sign from text and convert to number
+                let zoom = zoomComboBox.text.substring(
+                        0, zoomComboBox.text.length - 1) / 100
+                root.zoomChanged(zoom)
+                zoomComboBox.closePopup()
+            }
+
+            Connections {
+                target: documentView.documentView
+                function onCurrentZoomChanged() {
+                    zoomComboBox.text = Math.round(
+                                documentView.documentView.currentZoom * 100) + "%"
+                }
             }
         }
 

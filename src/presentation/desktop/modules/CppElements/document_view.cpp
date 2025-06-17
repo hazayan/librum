@@ -37,12 +37,14 @@ void DocumentView::setBookController(
     adapters::IBookController* newBookController)
 {
     m_bookController = newBookController;
+
     if(!setupDefaultPageHeight())
     {
         qWarning() << "Could not determine the default page size.";
         return;
     }
 
+    loadDefaultBookData();
     redrawPages();
 }
 
@@ -56,7 +58,7 @@ void DocumentView::wheelEvent(QWheelEvent* event)
     int deltaY = event->angleDelta().y();
     int deltaX = event->angleDelta().x();
     if(event->modifiers() & Qt::ControlModifier)
-        handleZoom(deltaY, ZoomMode::Mouse);
+        applyZoom(calculateNewZoom(deltaY), ZoomMode::Mouse);
     else
         handleScroll(deltaY, deltaX);
 
@@ -75,7 +77,7 @@ void DocumentView::keyPressEvent(QKeyEvent* event)
         break;
     case Qt::Key_Minus:
         if(event->modifiers() & Qt::ControlModifier)
-            handleZoom(-15, ZoomMode::Keyboard);
+            applyZoom(calculateNewZoom(-15), ZoomMode::Keyboard);
         break;
     default:
         break;
@@ -84,7 +86,7 @@ void DocumentView::keyPressEvent(QKeyEvent* event)
     // Need to handle CTRL + differently bc. it Key_Plus isn't recognized
     if(event->key() == Qt::Key_Plus || event->nativeVirtualKey() == 187)
     {
-        handleZoom(15, ZoomMode::Keyboard);
+        applyZoom(calculateNewZoom(15), ZoomMode::Keyboard);
     }
 
     event->accept();
@@ -206,12 +208,16 @@ void DocumentView::moveY(int amount)
     ensureInBounds();
 }
 
-void DocumentView::handleZoom(int deltaY, ZoomMode zoomMode)
+double DocumentView::calculateNewZoom(int deltaY)
 {
-    double newZoom =
-        m_currentZoom * (deltaY > 0 ? 1 + m_zoomFactor : 1 - m_zoomFactor);
+    return m_currentZoom * (deltaY > 0 ? 1 + m_zoomFactor : 1 - m_zoomFactor);
+}
+
+void DocumentView::applyZoom(double newZoom, ZoomMode zoomMode)
+{
     double scale = newZoom / m_currentZoom;
     m_currentZoom = newZoom;
+    emit currentZoomChanged();
 
     if(zoomMode == ZoomMode::Keyboard)
         m_contentY = contentYForCenterZoom(scale);
@@ -263,6 +269,18 @@ void DocumentView::ensureInBounds()
     emit contentYChanged();
 }
 
+void DocumentView::loadDefaultBookData()
+{
+    if(m_bookController == nullptr)
+        return;
+
+    // Calculate content y
+    auto newContentY = m_bookController->getCurrentPage() *
+                           (m_pageHeight + m_spacing) * m_currentZoom -
+                       m_spacing * m_currentZoom;
+    setContentY(newContentY);
+}
+
 long DocumentView::getContentHeight() const
 {
     return m_contentItem->height();
@@ -305,6 +323,19 @@ void DocumentView::setContentX(long newContentX)
 long DocumentView::getContentWidth() const
 {
     return m_contentItem->width();
+}
+
+double DocumentView::getCurrentZoom() const
+{
+    return m_currentZoom;
+}
+
+void DocumentView::setCurrentZoom(double newCurrentZoom)
+{
+    if(m_currentZoom == newCurrentZoom)
+        return;
+
+    applyZoom(newCurrentZoom, ZoomMode::Keyboard);
 }
 
 }  // namespace cpp_elements

@@ -21,6 +21,8 @@ class PRESENTATION_EXPORT DocumentView : public QQuickItem
         long contentY READ getContentY WRITE setContentY NOTIFY contentYChanged)
     Q_PROPERTY(
         long contentX READ getContentX WRITE setContentX NOTIFY contentXChanged)
+    Q_PROPERTY(double currentZoom READ getCurrentZoom WRITE setCurrentZoom
+                   NOTIFY currentZoomChanged)
 
 public:
     DocumentView();
@@ -30,15 +32,16 @@ public:
     void setContentY(long contentY);
     long getContentX() const;
     void setContentX(long newContentX);
-
     long getContentWidth() const;
+    double getCurrentZoom() const;
+    void setCurrentZoom(double newCurrentZoom);
 
 signals:
     void contentHeightChanged();
     void contentYChanged();
     void contentXChanged();
-
     void contentWidthChanged();
+    void currentZoomChanged();
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
@@ -59,10 +62,12 @@ private:
     void handleScroll(int deltaY, int deltaX);
     void moveX(int amount);
     void moveY(int amount);
-    void handleZoom(int deltaY, ZoomMode zoomMode);
+    void applyZoom(double zoom, ZoomMode zoomMode);
+    double calculateNewZoom(int deltaY);
     double contentYForCenterZoom(double scale);
     double contentYForMouseZoom(double scale);
     void ensureInBounds();
+    void loadDefaultBookData();
 
     adapters::IBookController* m_bookController = nullptr;
     QHash<int, PageView*> m_activePages;

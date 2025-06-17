@@ -34,17 +34,6 @@ Page {
         onTriggered: internal.saveCurrentPage()
     }
 
-    // Shortcut {
-    //     id: zoomIn
-    //     sequences: [SettingsController.shortcuts.ZoomIn]
-    //     onActivated: documentView.changeZoomBy(1.13)
-    // }
-
-    // Shortcut {
-    //     id: zoomOut
-    //     sequences: [SettingsController.shortcuts.ZoomOut]
-    //     onActivated: documentView.changeZoomBy(0.87)
-    // }
     Shortcut {
         id: nextPage
         sequences: [SettingsController.shortcuts.NextPage]
@@ -163,6 +152,10 @@ Page {
             onOptionsPopupVisibileChanged: {
                 optionsButton.active = !optionsButton.active
             }
+
+            onZoomChanged: newZoom => {
+                               documentView.setZoom(newZoom)
+                           }
 
             PropertyAnimation {
                 id: hideToolbar

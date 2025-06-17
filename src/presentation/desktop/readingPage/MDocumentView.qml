@@ -7,17 +7,13 @@ import Librum.globals
 import Librum.controllers
 import "DocumentNavigation.js" as NavigationLogic
 
-
-/*
-  A view on the document's pages in a certain layout (e.g. vertical)
-  */
 Pane {
   id: root
   property var lastSelectedPage
-  signal clicked
-
-  signal zoomFactorChanged(real factor)
   property var bookController
+  property alias documentView: documentView
+  signal zoomFactorChanged(real factor)
+  signal clicked
 
   padding: 0
   background: Rectangle {
@@ -57,6 +53,10 @@ Pane {
     clip: true
 
     Component.onCompleted: documentView.forceActiveFocus()
+
+    function testX() {
+      console.log("Link Works!")
+    }
   }
 
   ScrollBar {
@@ -153,5 +153,9 @@ Pane {
     id: translationPopup
     x: root.width / 2 - translationPopup.width / 2
     y: root.height / 2 - translationPopup.height / 2
+  }
+
+  function setZoom(newZoom) {
+    documentView.currentZoom = newZoom
   }
 }
