@@ -57,7 +57,7 @@ private:
 
 private:
     void redrawPages();
-    QPair<int, int> getPageSpanToRender() const;
+    QPair<int, int> getPageSpanToRender();
     bool setupDefaultPageHeight();
     void handleScroll(int deltaY, int deltaX);
     void moveX(int amount);

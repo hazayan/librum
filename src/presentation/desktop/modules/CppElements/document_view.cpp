@@ -18,6 +18,9 @@ DocumentView::DocumentView()
     m_contentItem->setParentItem(this);
     m_contentItem->setY(0);
 
+    // Redraw the page when the height changes
+    connect(this, &QQuickItem::heightChanged, this, &DocumentView::redrawPages);
+
     // Ensure the content item has the same width as the document view
     connect(this, &QQuickItem::implicitWidthChanged, this,
             [this]()
@@ -154,14 +157,16 @@ bool DocumentView::setupDefaultPageHeight()
     return true;
 }
 
-QPair<int, int> DocumentView::getPageSpanToRender() const
+QPair<int, int> DocumentView::getPageSpanToRender()
 {
     if(m_pageHeight == 0)
         return {};
 
-    int first = m_contentY / ((m_pageHeight + m_spacing) * m_currentZoom);
-    int pageStep = (m_pageHeight + m_spacing) * m_currentZoom;
-    int last = ((m_contentY + height()) + pageStep - 1) / pageStep - 1;
+    double pageStep = (m_pageHeight + m_spacing) * m_currentZoom;
+    int first = m_contentY / pageStep;
+    int last = (m_contentY + height()) / pageStep;
+
+    qDebug() << "First: " << first << "\tLast: " << last;
 
     // For the case that contentY perfectly aligns with the book
     // start (0) or end, we need to add or subtract 1
@@ -275,6 +280,7 @@ void DocumentView::loadDefaultBookData()
         return;
 
     // Calculate content y
+    auto x = m_bookController->getCurrentPage();
     auto newContentY = m_bookController->getCurrentPage() *
                        (m_pageHeight + m_spacing) * m_currentZoom;
     setContentY(newContentY);
