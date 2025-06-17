@@ -53,10 +53,6 @@ Pane {
     clip: true
 
     Component.onCompleted: documentView.forceActiveFocus()
-
-    function testX() {
-      console.log("Link Works!")
-    }
   }
 
   ScrollBar {

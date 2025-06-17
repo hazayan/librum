@@ -19,7 +19,16 @@ DocumentView::DocumentView()
     m_contentItem->setY(0);
 
     // Redraw the page when the height changes
-    connect(this, &QQuickItem::heightChanged, this, &DocumentView::redrawPages);
+    connect(this, &QQuickItem::heightChanged, this,
+            [this]()
+            {
+                ensureInBounds();
+                redrawPages();
+            });
+
+    // Update the current page when the content Y changes
+    connect(this, &DocumentView::contentYChanged, this,
+            &DocumentView::updateCurrentPage);
 
     // Ensure the content item has the same width as the document view
     connect(this, &QQuickItem::implicitWidthChanged, this,
@@ -49,6 +58,15 @@ void DocumentView::setBookController(
 
     loadDefaultBookData();
     redrawPages();
+}
+
+void DocumentView::loadDefaultBookData()
+{
+    if(m_bookController == nullptr)
+        return;
+
+    auto newContentY = getContentYForPage(m_bookController->getCurrentPage());
+    setContentY(newContentY);
 }
 
 QSGNode* DocumentView::updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*)
@@ -166,8 +184,6 @@ QPair<int, int> DocumentView::getPageSpanToRender()
     int first = m_contentY / pageStep;
     int last = (m_contentY + height()) / pageStep;
 
-    qDebug() << "First: " << first << "\tLast: " << last;
-
     // For the case that contentY perfectly aligns with the book
     // start (0) or end, we need to add or subtract 1
     if(last >= m_bookController->getPageCount())
@@ -274,16 +290,21 @@ void DocumentView::ensureInBounds()
     emit contentYChanged();
 }
 
-void DocumentView::loadDefaultBookData()
+void DocumentView::updateCurrentPage()
 {
-    if(m_bookController == nullptr)
-        return;
+    // The current page is the one at the middle of the screen
+    double pageStep = (m_pageHeight + m_spacing) * m_currentZoom;
+    int currentPage = (m_contentY + height() / 2) / pageStep;
+    if(currentPage != m_currentPage)
+    {
+        m_currentPage = currentPage;
+        emit currentPageChanged();
+    }
+}
 
-    // Calculate content y
-    auto x = m_bookController->getCurrentPage();
-    auto newContentY = m_bookController->getCurrentPage() *
-                       (m_pageHeight + m_spacing) * m_currentZoom;
-    setContentY(newContentY);
+long DocumentView::getContentYForPage(int page) const
+{
+    return page * (m_pageHeight + m_spacing) * m_currentZoom;
 }
 
 long DocumentView::getContentHeight() const
@@ -305,6 +326,7 @@ void DocumentView::setContentY(long newContentY)
     m_contentItem->setY(-m_contentY);
     emit contentYChanged();
 
+    ensureInBounds();
     redrawPages();
 }
 
@@ -341,6 +363,25 @@ void DocumentView::setCurrentZoom(double newCurrentZoom)
         return;
 
     applyZoom(newCurrentZoom, ZoomMode::Keyboard);
+}
+
+int DocumentView::currentPage() const
+{
+    return m_currentPage;
+}
+
+void DocumentView::setCurrentPage(int newCurrentPage)
+{
+    if(m_currentPage == newCurrentPage)
+        return;
+
+    if(newCurrentPage < 0 || newCurrentPage >= m_bookController->getPageCount())
+        return;
+
+    m_currentPage = newCurrentPage;
+    auto newContentY = getContentYForPage(newCurrentPage);
+    setContentY(newContentY);
+    emit currentPageChanged();
 }
 
 }  // namespace cpp_elements

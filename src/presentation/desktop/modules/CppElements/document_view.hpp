@@ -23,6 +23,8 @@ class PRESENTATION_EXPORT DocumentView : public QQuickItem
         long contentX READ getContentX WRITE setContentX NOTIFY contentXChanged)
     Q_PROPERTY(double currentZoom READ getCurrentZoom WRITE setCurrentZoom
                    NOTIFY currentZoomChanged)
+    Q_PROPERTY(int currentPage READ currentPage WRITE setCurrentPage NOTIFY
+                   currentPageChanged)
 
 public:
     DocumentView();
@@ -36,12 +38,16 @@ public:
     double getCurrentZoom() const;
     void setCurrentZoom(double newCurrentZoom);
 
+    int currentPage() const;
+    void setCurrentPage(int newCurrentPage);
+
 signals:
     void contentHeightChanged();
     void contentYChanged();
     void contentXChanged();
     void contentWidthChanged();
     void currentZoomChanged();
+    void currentPageChanged();
 
 protected:
     QSGNode* updatePaintNode(QSGNode* oldNode, UpdatePaintNodeData*) override;
@@ -68,6 +74,8 @@ private:
     double contentYForMouseZoom(double scale);
     void ensureInBounds();
     void loadDefaultBookData();
+    void updateCurrentPage();
+    long getContentYForPage(int page) const;
 
     adapters::IBookController* m_bookController = nullptr;
     QHash<int, PageView*> m_activePages;
@@ -78,6 +86,7 @@ private:
     double m_currentZoom = 1;
     double m_zoomFactor = 0.13;
     int m_spacing = 5;
+    int m_currentPage = 0;
 };
 
 }  // namespace cpp_elements

@@ -106,7 +106,6 @@ Page {
         MReadingToolBar {
             id: toolbar
             Layout.fillWidth: true
-            currentPage: BookController.currentPage
             pageCount: BookController.pageCount
             bookTitle: Globals.selectedBook.title
 
@@ -322,8 +321,7 @@ Page {
         property bool fullScreen: false
         property int prevCurrentPage: -1
 
-        // Just assign it once (no binding)
-        Component.onCompleted: prevCurrentPage = BookController.currentPage
+        Component.onCompleted: prevCurrentPage = documentView.documentView.currentPage
 
         function startFullScreenMode() {
             if (internal.fullScreen)
@@ -350,7 +348,7 @@ Page {
         }
 
         function saveCurrentPage() {
-            let currentPage = BookController.currentPage
+            let currentPage = documentView.documentView.currentPage
             if (currentPage === internal.prevCurrentPage)
                 return
 
