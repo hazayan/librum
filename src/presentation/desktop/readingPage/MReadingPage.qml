@@ -309,13 +309,6 @@ Page {
         }
     }
 
-    function getYOffset() {
-        let yOffset = documentView.documentView.contentY
-        let restoredYOffset = yOffset / documentView.documentView.currentZoom
-
-        return restoredYOffset
-    }
-
     QtObject {
         id: internal
         property bool fullScreen: false

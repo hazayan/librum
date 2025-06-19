@@ -23,8 +23,8 @@ else()
         desktop/modules/CppElements/page_view.hpp
         desktop/modules/CppElements/document_view.cpp
         desktop/modules/CppElements/document_view.hpp
-        desktop/modules/CppElements/test_rect.cpp
-        desktop/modules/CppElements/test_rect.hpp
+
+
     )
 endif()
 
