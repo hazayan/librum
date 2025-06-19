@@ -310,8 +310,8 @@ Page {
     }
 
     function getYOffset() {
-        let yOffset = documentView.getYOffset()
-        let restoredYOffset = yOffset / BookController.zoom
+        let yOffset = documentView.documentView.contentY
+        let restoredYOffset = yOffset / documentView.documentView.currentZoom
 
         return restoredYOffset
     }
