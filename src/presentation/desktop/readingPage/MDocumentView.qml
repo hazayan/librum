@@ -25,6 +25,28 @@ Pane {
                      }
 
   Connections {
+    target: root.bookController
+
+    function onGoToPosition(pageNumber, y) {
+      ; // TODO
+    }
+
+    function onTextSelectionFinished(centerX, topY) {
+      selectionOptionsPopup.highlight = ""
+
+      internal.openSelectionOptionsPopup(centerX, topY)
+    }
+
+    function onHighlightSelected(centerX, topY, highlightUuid) {
+      // Remove selection if there is one when selecting a highlight
+      activeFocusItem.removeSelection()
+      selectionOptionsPopup.highlight = highlightUuid
+
+      internal.openSelectionOptionsPopup(centerX, topY)
+    }
+  }
+
+  Connections {
     target: DictionaryController
 
     function onGettingDefinitionFailed() {}
@@ -149,6 +171,44 @@ Pane {
     id: translationPopup
     x: root.width / 2 - translationPopup.width / 2
     y: root.height / 2 - translationPopup.height / 2
+  }
+
+  QtObject {
+    id: internal
+    property string optionNameCursorModeHiddenAfterDelay: "Hidden after delay"
+
+    function openSelectionOptionsPopup(centerX, bottomY) {
+      if (centerX === -1 && bottomY === -1) {
+        centerX = selectionOptionsPopup.highlightCenterX
+        bottomY = selectionOptionsPopup.highlightBottomY
+      }
+      selectionOptionsPopup.highlightCenterX = centerX
+      selectionOptionsPopup.highlightBottomY = bottomY
+
+      internal.openPopupAt(selectionOptionsPopup, centerX, bottomY)
+    }
+
+    function openPopupAt(popup, centerX, bottomY) {
+      let pageYOffset = documentView.contentY - activeFocusItem.y
+      let pageXOffset = documentView.contentX - activeFocusItem.x
+
+      let posY = bottomY + -pageYOffset + 6
+      let spaceToBottom = (documentView.y + root.height) - (posY + popup.height)
+      if (spaceToBottom < 0)
+        posY = posY + spaceToBottom
+
+      let posX = centerX + documentView.x - popup.width / 2 - pageXOffset
+      let spaceToRight = (documentView.x + documentView.width) - (posX + popup.width)
+      if (spaceToRight < 0)
+        posX = posX + spaceToRight
+
+      let spaceToLeft = (documentView.x + documentView.width) - (posX + popup.width)
+
+      popup.x = posX
+      popup.y = posY
+
+      popup.open()
+    }
   }
 
   function setZoom(newZoom) {
