@@ -62,6 +62,25 @@ If you'd to support Librum's development, check out: https://librumreader.com/co
 All of the current feature requests, bugs and tasks are listed in the [issues](https://github.com/Librum-Reader/Librum/issues). Easy tasks are labeled "good first issue", so that is a good starting point.
 <br>
 <br>
+To ensure a consistent style across the codebase, we enforce auto-formatting using clang-format for c++ and the QML formatter for qml code. Make sure to setup both as described here before you contribute.
+
+<b>Qml Formatter:</b>
+- Go to Edit->Preferences
+- Tick the "Enable auto format on file save" checkbox under "Qt Quick"->"QML/Js Editing"
+  ![pic](https://github.com/user-attachments/assets/93138f09-c221-42e6-a8d2-06babfabc562)
+
+<b>Clang Format:</b>
+- Install on windows (https://releases.llvm.org/download.html) or linux
+- Get the Beautifier Plugin on Qt Creator
+- Go to Edit->Preferences and select Beautifier
+- Select the following in the general Tab
+  ![Screenshot 2025-06-19 231737](https://github.com/user-attachments/assets/c9ad066e-5fbb-4bd4-8cb0-2b2ea71ee14c)
+- At last, set these settings. Set the path to clang format in the "ClangFormat Command" field
+  ![image](https://github.com/user-attachments/assets/91995519-25b7-45bd-9c3e-55d569a979cd)
+
+
+
+<br>
 PS: Feel free to tag me (@DavidLazarescu) in the comments of any issue if you have questions. 
 
 <br>
