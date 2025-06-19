@@ -75,7 +75,7 @@ To ensure a consistent style across the codebase, we enforce auto-formatting usi
 - Go to Edit->Preferences and select Beautifier
 - Select the following in the general Tab
   ![Screenshot 2025-06-19 231737](https://github.com/user-attachments/assets/c9ad066e-5fbb-4bd4-8cb0-2b2ea71ee14c)
-- At last, set these settings
+- At last, set these settings. Set the path to clang format in the "ClangFormat Command" field
   ![image](https://github.com/user-attachments/assets/91995519-25b7-45bd-9c3e-55d569a979cd)
 
 
