@@ -63,7 +63,8 @@ void BookmarksProxyModel::setFilterString(QString newFilterString)
 
     m_filterString = newFilterString;
     auto input = string_utils::toUtf32(newFilterString);
-    m_filterScorer = std::make_unique<rapidfuzz::fuzz::CachedRatio<uint32_t>>(input);
+    m_filterScorer =
+        std::make_unique<rapidfuzz::fuzz::CachedRatio<uint32_t>>(input);
     emit filterStringUpdated();
     invalidate();
 }
