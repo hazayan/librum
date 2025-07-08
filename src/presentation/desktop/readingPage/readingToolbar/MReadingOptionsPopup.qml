@@ -126,13 +126,13 @@ Popup {
 
                         onClicked: {
                             let value = ""
-                            let current = BookController.colorTheme
+                            let current = OpenedBookController.colorTheme
                             if (current === "Inverted")
                                 value = "Normal"
                             else
                                 value = "Inverted"
 
-                            BookController.colorTheme = value
+                            OpenedBookController.colorTheme = value
                         }
                     }
 

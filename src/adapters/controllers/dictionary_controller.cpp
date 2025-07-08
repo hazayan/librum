@@ -20,9 +20,9 @@ DictionaryController::DictionaryController(
 
 void DictionaryController::getDefinitionForWord(const QString& word)
 {
-    emit startedGettingDefinition(word);
     m_dictionaryService->getDefinitionForWord(word);
-    m_searchedForWord = word;
+    m_currentWord = word;
+    emit currentWordChanged();
 }
 
 DictionaryEntryDto DictionaryController::definition() const
@@ -35,7 +35,6 @@ void DictionaryController::clearData()
     m_definition = DictionaryEntryDto {};
     m_previousDefinitions.clear();
     m_currentWord.clear();
-    m_searchedForWord.clear();
     emit definitionChanged();
 }
 
@@ -46,11 +45,16 @@ void DictionaryController::goToPreviousWord()
 
     auto previous = m_previousDefinitions.pop();
     m_currentWord = previous.first;
-    emit startedGettingDefinition(m_currentWord);
+    emit currentWordChanged();
 
     m_definition = previous.second;
     emit definitionChanged();
     gettingDefinitionSucceeded();
+}
+
+QString DictionaryController::getCurrentWord() const
+{
+    return m_currentWord;
 }
 
 void DictionaryController::processDefinition(bool success,
@@ -64,10 +68,10 @@ void DictionaryController::processDefinition(bool success,
         // with an uppercase letter after a period, but the dictionary API is
         // case-sensitive so we change it to lowercase by default. This can
         // cause problems for names or different languages though.
-        if(!m_searchedForWord.isEmpty() && !m_searchedForWord[0].isUpper())
+        if(!m_currentWord.isEmpty() && !m_currentWord[0].isUpper())
         {
             auto capitalizedWord =
-                m_searchedForWord[0].toUpper() + m_searchedForWord.mid(1);
+                m_currentWord[0].toUpper() + m_currentWord.mid(1);
             getDefinitionForWord(capitalizedWord);
             return;
         }
@@ -80,9 +84,8 @@ void DictionaryController::processDefinition(bool success,
         m_previousDefinitions.push({ m_currentWord, m_definition });
 
     m_definition = parseDefinition(definition);
-    m_currentWord = m_searchedForWord;
     emit definitionChanged();
-    gettingDefinitionSucceeded();
+    emit gettingDefinitionSucceeded();
 }
 
 DictionaryEntryDto DictionaryController::parseDefinition(

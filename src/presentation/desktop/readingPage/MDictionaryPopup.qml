@@ -10,9 +10,6 @@ import Librum.fonts
 
 Popup {
     id: root
-    property string word
-    property var previouslyFocusedPage
-
     implicitWidth: 500
     implicitHeight: 540
     padding: 16
@@ -25,23 +22,11 @@ Popup {
         border.color: Style.colorContainerBorder
     }
 
-    onOpened: {
-        previouslyFocusedPage = activeFocusItem
-        root.forceActiveFocus()
-    }
-
+    onOpened: root.forceActiveFocus()
     onClosed: DictionaryController.clearData()
 
     Connections {
         target: DictionaryController
-
-        function onStartedGettingDefinition() {
-            loadingAnimation.visible = true
-            language.text = ""
-
-            dictionaryList.visible = false
-            notFound.visible = false
-        }
 
         function onGettingDefinitionFailed() {
             loadingAnimation.visible = false
@@ -96,7 +81,7 @@ Popup {
                     verticalAlignment: Text.AlignVCenter
                     leftPadding: 12
                     color: Style.colorBaseInputText
-                    text: root.word
+                    text: DictionaryController.currentWord
                     font.pointSize: Fonts.size11
                     placeholderText: qsTr("Search")
                     placeholderTextColor: Style.colorPlaceholderText
@@ -107,14 +92,13 @@ Popup {
                         color: "transparent"
                     }
 
-                    onEditingFinished: DictionaryController.getDefinitionForWord(
-                                           text)
+                    onEditingFinished: root.lookupWord(text)
                 }
             }
         }
 
         Label {
-            text: root.word.toUpperCase()
+            text: DictionaryController.currentWord.toUpperCase()
             Layout.fillWidth: true
             Layout.maximumHeight: 30
             elide: Text.ElideRight
@@ -297,7 +281,7 @@ Popup {
                                                                         "Appendix:Glossary#",
                                                                         "")
 
-                                                        DictionaryController.getDefinitionForWord(
+                                                        root.lookupWord(
                                                                     fixedWord)
                                                     }
                                                 }
@@ -375,7 +359,8 @@ Popup {
                             onClicked: {
                                 if (searchOnlineLink.hoveredLink !== "")
                                     Qt.openUrlExternally(
-                                                "https://google.com/search?q=" + root.word)
+                                                "https://google.com/search?q="
+                                                + DictionaryController.currentWord)
                             }
                         }
                     }
@@ -408,5 +393,15 @@ Popup {
                     Qt.openUrlExternally(wiktionaryLink.hoveredLink)
             }
         }
+    }
+
+    function lookupWord(word) {
+        loadingAnimation.visible = true
+        language.text = ""
+
+        dictionaryList.visible = false
+        notFound.visible = false
+
+        DictionaryController.getDefinitionForWord(word)
     }
 }

@@ -19,5 +19,6 @@
     "ReloadApplication": "Ctrl+R",
     "AddBook": "Ctrl+N",
     "CreateHighlight": "H",
-    "RemoveHighlight": "Backspace"
+    "RemoveHighlight": "Backspace",
+    "PageDown": "Space"
 }

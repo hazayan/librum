@@ -66,7 +66,7 @@ Item {
                         color: "transparent"
                     }
 
-                    onTextEdited: BookController.tableOfContents.filterString = text
+                    onTextEdited: documentView.tableOfContents.filterString = text
                 }
             }
 

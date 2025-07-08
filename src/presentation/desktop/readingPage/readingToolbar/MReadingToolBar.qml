@@ -145,7 +145,7 @@ Pane {
                         color: Style.colorBaseInputText
                         font.pointSize: Fonts.size12
                         font.weight: Font.Normal
-                        text: documentView.documentView.currentPage + 1
+                        text: documentView.currentPage + 1
                         validator: IntValidator {
                             bottom: 0
                             top: 99999
@@ -164,10 +164,10 @@ Pane {
                         // but we present them as 1 to pageCount to the user.
                         onEditingFinished: {
                             let newPage = Number(inputField.text)
-                            documentView.documentView.currentPage = newPage - 1
+                            documentView.currentPage = newPage - 1
 
                             // Discard focus when finished
-                            documentView.documentView.forceActiveFocus()
+                            documentView.forceActiveFocus()
                         }
                     }
                 }
@@ -270,10 +270,9 @@ Pane {
             }
 
             Connections {
-                target: documentView.documentView
-                function onCurrentZoomChanged() {
-                    zoomComboBox.text = Math.round(
-                                documentView.documentView.currentZoom * 100) + "%"
+                target: documentView
+                function onZoomChanged(newZoom) {
+                    zoomComboBox.text = Math.round(newZoom * 100) + "%"
                 }
             }
         }

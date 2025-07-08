@@ -19,10 +19,10 @@ else()
     set(CPP_FILES
         desktop/modules/CppElements/key_sequence_recorder.cpp
         desktop/modules/CppElements/key_sequence_recorder.hpp
-        desktop/modules/CppElements/page_view.cpp
-        desktop/modules/CppElements/page_view.hpp
-        desktop/modules/CppElements/document_view.cpp
-        desktop/modules/CppElements/document_view.hpp
+        desktop/modules/CppElements/page.cpp
+        desktop/modules/CppElements/page.hpp
+        desktop/modules/CppElements/document.cpp
+        desktop/modules/CppElements/document.hpp
 
 
     )

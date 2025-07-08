@@ -62,6 +62,7 @@ Popup {
                 checkBoxStyle: root.checkBoxStyle
                 checkBoxImageSize: root.checkBoxImageSize
                 checkBoxSize: root.checkBoxSize
+                propertyName: root.contentPropertyName
 
                 onClicked: (mouse, index) => root.selectItem(index)
 

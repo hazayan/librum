@@ -15,6 +15,8 @@ namespace adapters
 class ADAPTERS_EXPORT IDictionaryController : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(
+        QString currentWord READ getCurrentWord NOTIFY currentWordChanged)
     Q_PROPERTY(dtos::DictionaryEntryDto definition READ definition NOTIFY
                    definitionChanged)
 
@@ -25,12 +27,13 @@ public:
     Q_INVOKABLE virtual void clearData() = 0;
     Q_INVOKABLE virtual void goToPreviousWord() = 0;
     virtual dtos::DictionaryEntryDto definition() const = 0;
+    virtual QString getCurrentWord() const = 0;
 
 signals:
     void definitionChanged();
-    void startedGettingDefinition(const QString& word);
     void gettingDefinitionSucceeded();
     void gettingDefinitionFailed();
+    void currentWordChanged();
 };
 
 }  // namespace adapters

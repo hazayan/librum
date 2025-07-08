@@ -59,7 +59,7 @@ Item {
                         color: "transparent"
                     }
 
-                    onTextEdited: BookController.bookmarksModel.filterString = text
+                    onTextEdited: OpenedBookController.bookmarksModel.filterString = text
                 }
             }
 
@@ -100,11 +100,15 @@ Item {
 
                     anchors.fill: parent
                     boundsBehavior: Flickable.StopAtBounds
-                    model: BookController.bookmarksModel
+                    model: OpenedBookController.bookmarksModel
                     clip: true
 
                     delegate: MBookmarkItem {
                         width: bookmarksView.width
+
+                        onLeftClicked: {
+                            OpenedBookController.goToBookmark(model.uuid)
+                        }
 
                         onRightClicked: (mouse, index) => {
                                             bookmarksView.currentIndex = index
@@ -179,7 +183,7 @@ Item {
                 text: qsTr("Delete")
 
                 onClicked: {
-                    BookController.removeBookmark(
+                    OpenedBookController.removeBookmark(
                                 bookmarksView.currentItem.uuid)
                     bookmarkOptionsPopup.close()
                 }
@@ -188,9 +192,9 @@ Item {
     }
 
     function createNewBookmark() {
-        let uuid = BookController.addBookmark(qsTr("New Bookmark"),
-                                              BookController.currentPage,
-                                              getYOffset())
+        let uuid = OpenedBookController.addBookmark(
+                qsTr("New Bookmark"), documentView.getTopPage(),
+                documentView.getTopPageYOffset())
         bookmarksView.lastAddedUuid = uuid
     }
 }

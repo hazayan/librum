@@ -9,8 +9,9 @@ add_library(adapters
                     interfaces/controllers/i_library_controller.hpp
                     interfaces/controllers/i_user_controller.hpp
                     interfaces/controllers/i_settings_controller.hpp
-                    interfaces/controllers/i_page_controller.hpp
-                    interfaces/controllers/i_book_controller.hpp
+                    interfaces/controllers/i_tools_controller.hpp
+
+                    interfaces/controllers/i_opened_book_controller.hpp
                     interfaces/controllers/i_app_info_controller.hpp
                     interfaces/controllers/i_dictionary_controller.hpp
                     interfaces/controllers/i_ai_tools_controller.hpp
@@ -22,6 +23,9 @@ add_library(adapters
                     interfaces/persistance/i_dictionary_access.hpp
                     interfaces/persistance/i_ai_tools_access.hpp
                     interfaces/persistance/i_folder_storage_access.hpp
+                    interfaces/core/i_document_access.hpp
+                    interfaces/core/i_page_renderer.hpp
+                    interfaces/core/i_document_searcher.hpp
                     
                     controllers/authentication_controller.cpp
                     controllers/authentication_controller.hpp
@@ -35,18 +39,16 @@ add_library(adapters
                     controllers/settings_controller.hpp
                     controllers/app_info_controller.cpp
                     controllers/app_info_controller.hpp
-                    controllers/book_controller.cpp
-                    controllers/book_controller.hpp
-                    controllers/page_controller.cpp
-                    controllers/page_controller.hpp
+                    controllers/opened_book_controller.cpp
+                    controllers/opened_book_controller.hpp
                     controllers/dictionary_controller.cpp
                     controllers/dictionary_controller.hpp
                     controllers/ai_tools_controller.cpp
                     controllers/ai_tools_controller.hpp
                     controllers/folder_controller.hpp
                     controllers/folder_controller.cpp
-                    controllers/external_book_controller.hpp
-                    controllers/external_book_controller.cpp
+                    controllers/external_opened_book_controller.hpp
+                    controllers/external_opened_book_controller.cpp
                     controllers/tools_controller.hpp
                     controllers/tools_controller.cpp
 
@@ -97,6 +99,12 @@ add_library(adapters
                     data_models/book_title_model/book_title_model.cpp
                     data_models/book_title_model/book_title_proxy_model.hpp
                     data_models/book_title_model/book_title_proxy_model.cpp
+                    data_models/toc_model/toc_item.hpp
+                    data_models/toc_model/toc_item.cpp
+                    data_models/toc_model/toc_model.hpp
+                    data_models/toc_model/toc_model.cpp
+                    data_models/toc_model/filtered_toc_model.hpp
+                    data_models/toc_model/filtered_toc_model.cpp
                     
                     DTOs/login_dto.hpp
                     DTOs/register_dto.hpp
@@ -106,7 +114,16 @@ add_library(adapters
                     DTOs/rectf_dto.hpp
                     DTOs/word_definition_dto.hpp
                     DTOs/folder_dto.hpp
-                    interfaces/controllers/i_tools_controller.hpp
+
+                    core/page_renderer.hpp
+                    core/page_renderer.cpp
+                    core/document_access.hpp
+                    core/document_access.cpp
+                    core/document_position.hpp
+                    core/document_searcher.hpp
+                    core/document_searcher.cpp
+                    core/document_search_options.cpp
+                    core/document_search_options.hpp
 )
 
 target_compile_definitions(adapters PRIVATE ADAPTERS_LIBRARY)
@@ -116,8 +133,10 @@ target_include_directories(adapters
                     ${CMAKE_CURRENT_SOURCE_DIR}
                     ${CMAKE_CURRENT_SOURCE_DIR}/interfaces/persistance
                     ${CMAKE_CURRENT_SOURCE_DIR}/interfaces/controllers
+                    ${CMAKE_CURRENT_SOURCE_DIR}/interfaces/core
                     ${CMAKE_CURRENT_SOURCE_DIR}/controllers
                     ${CMAKE_CURRENT_SOURCE_DIR}/gateways
+                    ${CMAKE_CURRENT_SOURCE_DIR}/core
                     ${CMAKE_CURRENT_SOURCE_DIR}/DTOs
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models/library_model
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models/free_books_model
@@ -127,6 +146,7 @@ target_include_directories(adapters
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models/folders_model
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models/icon_model
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models/book_title_model
+                    ${CMAKE_CURRENT_SOURCE_DIR}/data_models/toc_model
                     ${CMAKE_CURRENT_SOURCE_DIR}/data_models
                 PRIVATE
                     ${DOMAIN_INCLUDES}

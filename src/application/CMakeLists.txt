@@ -8,7 +8,7 @@ set(application_SRC
     interfaces/services/i_user_service.hpp
     interfaces/services/i_settings_service.hpp
     interfaces/services/i_app_info_service.hpp
-    interfaces/services/i_book_service.hpp
+    interfaces/services/i_opened_book_service.hpp
     interfaces/services/i_dictionary_service.hpp
     interfaces/services/i_ai_tools_service.hpp
     interfaces/services/i_folder_service.hpp
@@ -38,8 +38,8 @@ set(application_SRC
     services/settings_service.hpp
     services/app_info_service.cpp
     services/app_info_service.hpp
-    services/book_service.hpp
-    services/book_service.cpp
+    services/opened_book_service.hpp
+    services/opened_book_service.cpp
     services/dictionary_service.cpp
     services/dictionary_service.hpp
     services/ai_tools_service.cpp
@@ -75,23 +75,20 @@ set(application_SRC
     utility/external_book_getter.hpp
     utility/external_book_getter.cpp
     
-    core/page_generator.hpp
-    core/page_generator.cpp
+    core/mupdf_document_access.cpp
+    core/mupdf_document_access.hpp
+    core/mupdf_page_renderer.hpp
+    core/mupdf_page_renderer.cpp
     core/metadata_extractor.cpp
     core/metadata_extractor.hpp
-    core/toc/toc_item.hpp
-    core/toc/toc_item.cpp
-    core/toc/toc_model.hpp
-    core/toc/toc_model.cpp
-    core/toc/filtered_toc_model.hpp
-    core/toc/filtered_toc_model.cpp
-    core/utils/book_searcher.hpp
-    core/utils/book_searcher.cpp
+
     core/utils/fz_utils.hpp
     core/utils/text_selector.hpp
     core/utils/text_selector.cpp
-    core/utils/search_options.hpp
+    core/utils/mupdf_search_options.hpp
     core/utils/mutool_utils.hpp
+    core/mupdf_document_searcher.hpp
+    core/mupdf_document_searcher.cpp
 )
 
 

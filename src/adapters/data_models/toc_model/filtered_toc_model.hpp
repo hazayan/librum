@@ -1,0 +1,38 @@
+#pragma once
+#include <QObject>
+#include <QSortFilterProxyModel>
+#include <QString>
+#include <memory>
+#include <rapidfuzz/fuzz.hpp>
+#include "adapters_export.hpp"
+#include "toc_item.hpp"
+
+namespace adapters::data_models
+{
+
+class ADAPTERS_EXPORT FilteredTOCModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+    Q_PROPERTY(QString filterString READ getFilterString WRITE setFilterString
+                   NOTIFY filterStringUpdated)
+
+public:
+    explicit FilteredTOCModel(QObject* parent = nullptr);
+
+    bool filterAcceptsRow(int row, const QModelIndex& parent) const override;
+    void setFilterString(QString filterString);
+    QString getFilterString();
+
+signals:
+    void filterStringUpdated();
+
+private:
+    // Recursively check if the item or any of its children match the filter
+    bool hasChildrenMatchingTheFilter(const TOCItem* item) const;
+    bool itemPassesFilter(const TOCItem* item) const;
+
+    QString m_filterString;
+    std::unique_ptr<rapidfuzz::fuzz::CachedRatio<unsigned int>> m_filterScorer;
+};
+
+}  // namespace adapters::data_models

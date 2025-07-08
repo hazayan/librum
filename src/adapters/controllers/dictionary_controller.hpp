@@ -18,9 +18,10 @@ public:
     DictionaryController(application::IDictionaryService* dictionaryService);
 
     void getDefinitionForWord(const QString& word) override;
-    dtos::DictionaryEntryDto definition() const override;
     void clearData() override;
     void goToPreviousWord() override;
+    dtos::DictionaryEntryDto definition() const override;
+    QString getCurrentWord() const override;
 
 private slots:
     void processDefinition(bool success, const QJsonObject& definition);
@@ -29,7 +30,6 @@ private:
     dtos::DictionaryEntryDto parseDefinition(const QJsonObject& definition);
     QStack<QPair<QString, dtos::DictionaryEntryDto>> m_previousDefinitions;
     QString m_currentWord;
-    QString m_searchedForWord;
 
     application::IDictionaryService* m_dictionaryService;
     dtos::DictionaryEntryDto m_definition;

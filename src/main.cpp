@@ -21,17 +21,16 @@
 #include "app_info_controller.hpp"
 #include "book_dto.hpp"
 #include "book_operation_status.hpp"
-#include "book_service.hpp"
 #include "dependency_injection.hpp"
-#include "document_view.hpp"
-#include "external_book_controller.hpp"
+#include "document.hpp"
+#include "external_opened_book_controller.hpp"
 #include "folder_dto.hpp"
 #include "free_books_model.hpp"
 #include "i_free_books_service.hpp"
 #include "i_library_service.hpp"
 #include "i_user_service.hpp"
 #include "library_proxy_model.hpp"
-#include "page_view.hpp"
+#include "opened_book_service.hpp"
 #include "setting_groups.hpp"
 #include "setting_keys.hpp"
 #include "shortcuts_proxy_model.hpp"
@@ -91,8 +90,7 @@ int main(int argc, char* argv[])
     qRegisterMetaType<adapters::dtos::DictionaryEntryDto>();
     qRegisterMetaType<adapters::dtos::WordTypeDto>();
     qRegisterMetaType<adapters::dtos::WordDefinitionDto>();
-    qmlRegisterType<cpp_elements::PageView>("Librum.elements", 1, 0, "PageView");
-    qmlRegisterType<cpp_elements::DocumentView>("Librum.elements", 1, 0, "DocumentView");
+    qmlRegisterType<cpp_elements::Document>("Librum.elements", 1, 0, "Document");
 
 #if !defined(Q_OS_ANDROID) && !defined(Q_OS_IOS)
     qmlRegisterType<cpp_elements::KeySequenceRecorder>("Librum.elements", 1, 0, "KeySequenceRecorder");
@@ -148,16 +146,16 @@ int main(int argc, char* argv[])
     qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "LibraryController",
                                  libraryController.get());
 
-    // Book Stack
-    auto bookService = std::make_unique<application::services::BookService>();
-    auto bookController = std::make_unique<BookController>(bookService.get(), libraryService);
-    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "BookController",
+    // Opened Book Stack
+    auto bookService = std::make_unique<application::services::OpenedBookService>();
+    auto bookController = std::make_unique<OpenedBookController>(bookService.get(), libraryService);
+    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "OpenedBookController",
                                  bookController.get());
 
-    // External Book Stack
-    auto externalBookService = std::make_unique<application::services::BookService>();
-    auto externalBookController = std::make_unique<ExternalBookController>(externalBookService.get());
-    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "ExternalBookController",
+    // External Opened Book Stack
+    auto externalBookService = std::make_unique<application::services::OpenedBookService>();
+    auto externalBookController = std::make_unique<ExternalOpenedBookController>(externalBookService.get());
+    qmlRegisterSingletonInstance("Librum.controllers", 1, 0, "ExternalOpenedBookController",
                                  externalBookController.get());
 
     // Free books stack

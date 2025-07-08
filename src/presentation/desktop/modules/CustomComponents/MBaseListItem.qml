@@ -8,6 +8,7 @@ import Librum.fonts
 Item {
     id: root
     property ListView containingListview
+    property string propertyName: "text"
     property int actualWidth: checkBox.implicitWidth + layout.spacing + content.implicitWidth
     property int index
     property bool selected: false
@@ -69,7 +70,7 @@ Item {
                 leftPadding: 0
                 bottomPadding: 1
                 readOnly: true
-                text: root.getContent()
+                text: root.getItemProperty(root.propertyName)
                 color: root.checkBoxStyle == false
                        && root.selected ? Style.colorBasePurple : root.fontColor
                 font.pointSize: root.fontSize
@@ -107,10 +108,6 @@ Item {
 
     function getRole() {
         return model.role
-    }
-
-    function getContent() {
-        return model.text
     }
 
     function getItemProperty(prop) {

@@ -5,213 +5,245 @@ import Librum.elements
 import Librum.style
 import Librum.globals
 import Librum.controllers
-import "DocumentNavigation.js" as NavigationLogic
 
 Pane {
-  id: root
-  property var lastSelectedPage
-  property var bookController
-  property alias documentView: documentView
-  signal zoomFactorChanged(real factor)
-  signal clicked
+    id: root
+    property var openedBookController
+    property var lastSelectedPage
 
-  padding: 0
-  background: Rectangle {
-    color: "transparent"
-  }
-  // Disable pressing tab to focus other elements
-  Keys.onTabPressed: event => {
-                       event.accepted = true
-                     }
+    signal zoomChanged(real zoom)
+    signal mouseMoved(real x, real y)
 
-  Connections {
-    target: root.bookController
+    // Read only access to the document's properties to allow bindings
+    readonly property alias currentPage: document.currentPage
+    readonly property alias currentZoom: document.currentZoom
+    readonly property alias tableOfContents: document.tableOfContents
+    readonly property alias documentSearcher: document.documentSearcher
+    readonly property alias topPage: document.topPage
 
-    function onGoToPosition(pageNumber, y) {
-      ; // TODO
-    }
-
-    function onTextSelectionFinished(centerX, topY) {
-      selectionOptionsPopup.highlight = ""
-
-      internal.openSelectionOptionsPopup(centerX, topY)
-    }
-
-    function onHighlightSelected(centerX, topY, highlightUuid) {
-      // Remove selection if there is one when selecting a highlight
-      activeFocusItem.removeSelection()
-      selectionOptionsPopup.highlight = highlightUuid
-
-      internal.openSelectionOptionsPopup(centerX, topY)
-    }
-  }
-
-  Connections {
-    target: DictionaryController
-
-    function onGettingDefinitionFailed() {}
-
-    function onStartedGettingDefinition(word) {
-      if (!dictionaryPopup.opened) {
-        dictionaryPopup.x = Qt.binding(function () {
-          return root.width / 2 - dictionaryPopup.width / 2
-        })
-        dictionaryPopup.y = Qt.binding(function () {
-          return root.height / 2 - dictionaryPopup.height / 2
-        })
-        dictionaryPopup.open()
-      }
-
-      dictionaryPopup.word = word
-    }
-  }
-
-  DocumentView {
-    id: documentView
-    height: parent.height
-    width: Math.min(implicitWidth, parent.width)
-    anchors.centerIn: parent
-    bookController: root.bookController
-    clip: true
-
-    Component.onCompleted: documentView.forceActiveFocus()
-  }
-
-  ScrollBar {
-    id: verticalScrollbar
-    width: pressed ? 14 : 12
-    hoverEnabled: true
-    active: true
-    policy: ScrollBar.AlwaysOn
-    orientation: Qt.Vertical
-    size: documentView.height / documentView.contentHeight
-    minimumSize: 0.04
-    position: documentView.contentY / documentView.contentHeight
-    onPositionChanged: if (pressed)
-                         documentView.contentY = position * documentView.contentHeight
-    anchors.top: parent.top
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    horizontalPadding: 4
-
-    contentItem: Rectangle {
-      color: Style.colorScrollBarHandle
-      opacity: verticalScrollbar.pressed ? 0.8 : 1
-      radius: 4
-    }
-
+    padding: 0
     background: Rectangle {
-      implicitWidth: 26
-      implicitHeight: 200
-      color: verticalScrollbar.pressed
-             || verticalScrollbar.hovered ? Style.colorContainerBackground : "transparent"
+        color: "transparent"
     }
-  }
+    // Disable pressing tab to focus other elements
+    Keys.onTabPressed: event => {
+                           event.accepted = true
+                       }
 
-  ScrollBar {
-    id: horizontalScrollbar
-    height: hovered ? 12 : 10
-    hoverEnabled: true
-    active: true
-    policy: ScrollBar.AlwaysOn
-    visible: documentView.contentWidth > documentView.width
-    orientation: Qt.Horizontal
-    size: documentView.width / documentView.contentWidth
-    minimumSize: 0.04
-    position: documentView.contentX / documentView.contentWidth
-    onPositionChanged: documentView.contentX = position * documentView.contentWidth
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.bottom: parent.bottom
-    horizontalPadding: 4
+    Connections {
+        target: root.openedBookController
 
-    contentItem: Rectangle {
-      color: Style.colorScrollBarHandle
-      opacity: horizontalScrollbar.pressed ? 0.8 : 1
-      radius: 4
+        // When bookmark was clicked
+        function onGoToBookmarkPosition(pageNumber, y) {
+            setPage(pageNumber, y * document.currentZoom)
+        }
     }
 
-    background: Rectangle {
-      implicitWidth: 26
-      implicitHeight: 200
-      color: "transparent"
-    }
-  }
+    Document {
+        id: document
+        height: parent.height
+        width: Math.min(implicitWidth, parent.width)
+        anchors.centerIn: parent
+        openedBookController: root.openedBookController
+        settingsController: SettingsController
+        clip: true
 
-  MSelectionOptionsPopup {
-    id: selectionOptionsPopup
-    property real highlightCenterX
-    property real highlightBottomY
+        onCurrentZoomChanged: root.zoomChanged(document.currentZoom)
+        onMouseMoved: (x, y) => root.mouseMoved(x, y)
 
-    onNewWidth: internal.openSelectionOptionsPopup(-1, -1)
+        // Close the selection popup when moving
+        onContentYChanged: selectionOptionsPopup.close()
 
-    onExplanationOptionSelected: text => {
-                                   explanationPopup.question = text
-                                   explanationPopup.open()
+        onTextSelectionFinished: (centerX, topY) => {
+                                     selectionOptionsPopup.highlight = ""
+
+                                     internal.openSelectionOptionsPopup(
+                                         centerX, topY)
                                  }
 
-    onTranslationOptionSelected: text => {
-                                   translationPopup.input = text.replace(
-                                     /\r|\n/g, '')
-                                   translationPopup.open()
-                                 }
-  }
+        onHighlightSelected: (centerX, topY, highlightUuid) => {
+                                 // Remove selection if there is one when selecting a highlight
+                                 activeFocusItem.removeSelection()
+                                 selectionOptionsPopup.highlight = highlightUuid
 
-  MDictionaryPopup {
-    id: dictionaryPopup
-  }
+                                 internal.openSelectionOptionsPopup(centerX,
+                                                                    topY)
+                             }
 
-  MExplanationPopup {
-    id: explanationPopup
-    x: root.width / 2 - explanationPopup.width / 2
-    y: root.height / 2 - explanationPopup.height / 2
-  }
-
-  MTranslationPopup {
-    id: translationPopup
-    x: root.width / 2 - translationPopup.width / 2
-    y: root.height / 2 - translationPopup.height / 2
-  }
-
-  QtObject {
-    id: internal
-    property string optionNameCursorModeHiddenAfterDelay: "Hidden after delay"
-
-    function openSelectionOptionsPopup(centerX, bottomY) {
-      if (centerX === -1 && bottomY === -1) {
-        centerX = selectionOptionsPopup.highlightCenterX
-        bottomY = selectionOptionsPopup.highlightBottomY
-      }
-      selectionOptionsPopup.highlightCenterX = centerX
-      selectionOptionsPopup.highlightBottomY = bottomY
-
-      internal.openPopupAt(selectionOptionsPopup, centerX, bottomY)
+        Component.onCompleted: document.forceActiveFocus()
     }
 
-    function openPopupAt(popup, centerX, bottomY) {
-      let pageYOffset = documentView.contentY - activeFocusItem.y
-      let pageXOffset = documentView.contentX - activeFocusItem.x
+    ScrollBar {
+        id: verticalScrollbar
+        width: pressed ? 14 : 12
+        hoverEnabled: true
+        active: true
+        policy: ScrollBar.AlwaysOn
+        orientation: Qt.Vertical
+        size: document.height / document.contentHeight
+        minimumSize: 0.04
+        position: document.contentY / document.contentHeight
+        onPositionChanged: if (pressed)
+                               document.contentY = position * document.contentHeight
+        anchors.top: parent.top
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        horizontalPadding: 4
 
-      let posY = bottomY + -pageYOffset + 6
-      let spaceToBottom = (documentView.y + root.height) - (posY + popup.height)
-      if (spaceToBottom < 0)
-        posY = posY + spaceToBottom
+        contentItem: Rectangle {
+            color: Style.colorScrollBarHandle
+            opacity: verticalScrollbar.pressed ? 0.8 : 1
+            radius: 4
+        }
 
-      let posX = centerX + documentView.x - popup.width / 2 - pageXOffset
-      let spaceToRight = (documentView.x + documentView.width) - (posX + popup.width)
-      if (spaceToRight < 0)
-        posX = posX + spaceToRight
-
-      let spaceToLeft = (documentView.x + documentView.width) - (posX + popup.width)
-
-      popup.x = posX
-      popup.y = posY
-
-      popup.open()
+        background: Rectangle {
+            implicitWidth: 26
+            implicitHeight: 200
+            color: verticalScrollbar.pressed
+                   || verticalScrollbar.hovered ? Style.colorContainerBackground : "transparent"
+        }
     }
-  }
 
-  function setZoom(newZoom) {
-    documentView.currentZoom = newZoom
-  }
+    ScrollBar {
+        id: horizontalScrollbar
+        height: hovered ? 12 : 10
+        hoverEnabled: true
+        active: true
+        policy: ScrollBar.AlwaysOn
+        visible: document.contentWidth > document.width
+        orientation: Qt.Horizontal
+        size: document.width / document.contentWidth
+        minimumSize: 0.04
+        position: document.contentX / document.contentWidth
+        onPositionChanged: document.contentX = position * document.contentWidth
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        horizontalPadding: 4
+
+        contentItem: Rectangle {
+            color: Style.colorScrollBarHandle
+            opacity: horizontalScrollbar.pressed ? 0.8 : 1
+            radius: 4
+        }
+
+        background: Rectangle {
+            implicitWidth: 26
+            implicitHeight: 200
+            color: "transparent"
+        }
+    }
+
+    MSelectionOptionsPopup {
+        id: selectionOptionsPopup
+        property real highlightCenterX
+        property real highlightBottomY
+
+        onNewWidth: internal.openSelectionOptionsPopup(-1, -1)
+
+        onExplanationOptionSelected: text => {
+                                         explanationPopup.question = text
+                                         explanationPopup.open()
+                                     }
+
+        onTranslationOptionSelected: text => {
+                                         translationPopup.input = text.replace(
+                                             /\r|\n/g, '')
+                                         translationPopup.open()
+                                     }
+
+        onDictionaryOptionSelected: text => {
+                                        dictionaryPopup.open()
+                                        dictionaryPopup.lookupWord(text)
+                                    }
+    }
+
+    MDictionaryPopup {
+        id: dictionaryPopup
+        x: root.width / 2 - dictionaryPopup.width / 2
+        y: root.height / 2 - dictionaryPopup.height / 2
+    }
+
+    MExplanationPopup {
+        id: explanationPopup
+        x: root.width / 2 - explanationPopup.width / 2
+        y: root.height / 2 - explanationPopup.height / 2
+    }
+
+    MTranslationPopup {
+        id: translationPopup
+        x: root.width / 2 - translationPopup.width / 2
+        y: root.height / 2 - translationPopup.height / 2
+    }
+
+    QtObject {
+        id: internal
+        property string optionNameCursorModeHiddenAfterDelay: "Hidden after delay"
+
+        function openSelectionOptionsPopup(centerX, bottomY) {
+            if (centerX === -1 && bottomY === -1) {
+                centerX = selectionOptionsPopup.highlightCenterX
+                bottomY = selectionOptionsPopup.highlightBottomY
+            }
+            selectionOptionsPopup.highlightCenterX = centerX
+            selectionOptionsPopup.highlightBottomY = bottomY
+
+            internal.openPopupAt(selectionOptionsPopup, centerX, bottomY)
+        }
+
+        function openPopupAt(popup, centerX, bottomY) {
+            let pageYOffset = document.contentY - activeFocusItem.y
+            let pageXOffset = document.contentX - activeFocusItem.x
+
+            let posY = bottomY + -pageYOffset + 6
+            let spaceToBottom = (document.y + root.height) - (posY + popup.height)
+            if (spaceToBottom < 0)
+                posY = posY + spaceToBottom
+
+            let posX = centerX + document.x - popup.width / 2 - pageXOffset
+            let spaceToRight = (document.x + document.width) - (posX + popup.width)
+            if (spaceToRight < 0)
+                posX = posX + spaceToRight
+
+            let spaceToLeft = (document.x + document.width) - (posX + popup.width)
+
+            popup.x = posX
+            popup.y = posY
+
+            popup.open()
+        }
+    }
+
+    function setPage(pageNumber, offsetY = 0) {
+        document.currentPage = pageNumber
+
+        if (offsetY !== 0) {
+            let newContentY = document.contentY + offsetY
+            document.contentY = newContentY
+        }
+    }
+
+    function setZoom(newZoom) {
+        document.currentZoom = newZoom
+    }
+
+    function getTopPage() {
+        return document.topPage
+    }
+
+    function getTopPageYOffset() {
+        return document.topPageYOffset
+    }
+
+    function removeSelectionsFromPage(pageNumber) {
+        document.removeSelectionFromPage(pageNumber)
+    }
+
+    function restoreCursor() {
+        document.restoreCursor()
+    }
+
+    function hideCursor() {
+        document.hideCursor()
+    }
 }

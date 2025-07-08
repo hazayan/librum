@@ -196,8 +196,11 @@ Page {
                       / 2 - sidebar.width / 2 - root.horizontalPadding)
         y: Math.round(root.height / 2 - implicitHeight / 2 - 115)
 
-        onApplied: (shortcut, value) => SettingsController.setSetting(
-                       shortcut, value, SettingGroups.Shortcuts)
+        onApplied: (shortcut, value) => {
+                       console.log("Calling")
+                       SettingsController.setSetting(shortcut, value,
+                                                     SettingGroups.Shortcuts)
+                   }
     }
 
     QtObject {

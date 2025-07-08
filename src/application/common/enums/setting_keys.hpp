@@ -56,6 +56,7 @@ enum class SettingKeys
     AddBook,
     CreateHighlight,
     RemoveHighlight,
+    PageDown,
 
     SettingKeys_END
 };

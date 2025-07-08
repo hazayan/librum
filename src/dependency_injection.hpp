@@ -12,8 +12,6 @@
 #include "authentication_controller.hpp"
 #include "authentication_gateway.hpp"
 #include "authentication_service.hpp"
-#include "book_controller.hpp"
-#include "book_service.hpp"
 #include "dictionary_access.hpp"
 #include "dictionary_controller.hpp"
 #include "dictionary_gateway.hpp"
@@ -36,6 +34,8 @@
 #include "library_storage_manager.hpp"
 #include "local_library_tracker.hpp"
 #include "metadata_extractor.hpp"
+#include "opened_book_controller.hpp"
+#include "opened_book_service.hpp"
 #include "settings_controller.hpp"
 #include "settings_service.hpp"
 #include "tools_controller.hpp"
@@ -88,9 +88,10 @@ const auto diConfig = []
         di::bind<ILibraryStorageAccess>()
             .to<persistence::LibraryStorageAccess>(),
 
-        // Books
-        di::bind<IBookController>().to<controllers::BookController>(),
-        di::bind<IBookService>().to<services::BookService>(),
+        // Opened Book
+        di::bind<IOpenedBookController>()
+            .to<controllers::OpenedBookController>(),
+        di::bind<IOpenedBookService>().to<services::OpenedBookService>(),
 
         // Free books
         di::bind<IFreeBooksController>().to<controllers::FreeBooksController>(),

@@ -9,7 +9,6 @@ import Librum.fonts
 
 Item {
     id: root
-    property var bookController
     signal searchQueried(string query)
     signal clearQuery
     signal nextButtonClicked
@@ -28,6 +27,8 @@ Item {
             inputField.previousText = ""
             root.forceActiveFocus()
             optionsPopup.close()
+
+            internal.resetSearchError()
         }
     }
 
@@ -38,13 +39,6 @@ Item {
                             event.accepted = true
                         }
                     }
-
-    Connections {
-        target: root.bookController
-        function onNoSearchHitsFound() {
-            internal.setSearchError()
-        }
-    }
 
     ColumnLayout {
         id: layout
@@ -219,18 +213,6 @@ Item {
         property color previousBackgroundColor: inputFieldContainer.background.color
         property color previousBorderColor: inputFieldContainer.background.border.color
 
-        function setSearchError() {
-            previousTextColor = inputField.color
-            previousBackgroundColor = inputFieldContainer.background.color
-            previousBorderColor = inputFieldContainer.background.border.color
-
-            inputField.color = Style.colorErrorText
-            inputFieldContainer.background.color = Style.colorErrorBackground
-            inputFieldContainer.background.border.color = Style.colorErrorBorder
-
-            error = true
-        }
-
         function resetSearchError() {
             if (!error)
                 return
@@ -239,8 +221,20 @@ Item {
             inputFieldContainer.background.color = previousBackgroundColor
             inputFieldContainer.background.border.color = previousBorderColor
 
-            error = false
+            internal.error = false
         }
+    }
+
+    function setSearchError() {
+        internal.previousTextColor = inputField.color
+        internal.previousBackgroundColor = inputFieldContainer.background.color
+        internal.previousBorderColor = inputFieldContainer.background.border.color
+
+        inputField.color = Style.colorErrorText
+        inputFieldContainer.background.color = Style.colorErrorBackground
+        inputFieldContainer.background.border.color = Style.colorErrorBorder
+
+        internal.error = true
     }
 
     function giveFocus() {

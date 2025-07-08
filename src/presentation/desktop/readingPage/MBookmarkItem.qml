@@ -10,6 +10,7 @@ Rectangle {
     id: root
     property string uuid: model.uuid
     signal rightClicked(var mouse, int index)
+    signal leftClicked(string uuid)
 
     opacity: area.pressed ? 0.78 : 1
     implicitHeight: 24
@@ -61,7 +62,7 @@ Rectangle {
                 root.forceActiveFocus()
                 nameText.deselect()
                 cursorPosition = 0
-                BookController.renameBookmark(model.uuid, nameText.text)
+                OpenedBookController.renameBookmark(model.uuid, nameText.text)
 
                 nameText.text = Qt.binding(function () {
                     return model.name
@@ -102,15 +103,11 @@ Rectangle {
 
         onClicked: mouse => {
                        if (mouse.button === Qt.LeftButton) {
-                           goToBookmark()
+                           root.leftClicked(model.uuid)
                        } else if (mouse.button === Qt.RightButton) {
                            root.rightClicked(mouse, model.index)
                        }
                    }
-    }
-
-    function goToBookmark() {
-        BookController.goToBookmark(model.uuid)
     }
 
     function startRenaming() {

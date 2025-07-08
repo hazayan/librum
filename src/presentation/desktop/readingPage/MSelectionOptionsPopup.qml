@@ -84,7 +84,6 @@ Popup {
                     anchors.fill: parent
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
-                    onContainsMouseChanged: activeFocusItem.setPointingCursor()
 
                     onClicked: {
                         let uuid = root.highlight
@@ -193,7 +192,7 @@ Popup {
                     text = firstLetter + restOfString
                     DictionaryController.getDefinitionForWord(text)
 
-                    // root.dictionaryOptionSelected(text)
+                    root.dictionaryOptionSelected(text)
                     root.close()
                 }
             }
@@ -235,7 +234,7 @@ Popup {
             Layout.fillWidth: true
             Layout.leftMargin: 16
             Layout.rightMargin: 16
-            opacity: lookUpTextArea.pressed ? 0.6 : 1
+            opacity: translateText.pressed ? 0.6 : 1
             text: qsTr("Translate")
             color: Style.colorText
             font.weight: Font.Normal

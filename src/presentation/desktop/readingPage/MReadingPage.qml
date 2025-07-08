@@ -106,7 +106,7 @@ Page {
         MReadingToolBar {
             id: toolbar
             Layout.fillWidth: true
-            pageCount: BookController.pageCount
+            pageCount: OpenedBookController.pageCount
             bookTitle: Globals.selectedBook.title
 
             onBackButtonClicked: {
@@ -152,9 +152,7 @@ Page {
                 optionsButton.active = !optionsButton.active
             }
 
-            onZoomChanged: newZoom => {
-                               documentView.setZoom(newZoom)
-                           }
+            onZoomChanged: newZoom => documentView.setZoom(newZoom)
 
             PropertyAnimation {
                 id: hideToolbar
@@ -214,13 +212,16 @@ Page {
                     property bool active: false
                     anchors.fill: parent
                     visible: false
-                    model: BookController.tableOfContents
+                    model: documentView.tableOfContents
 
                     // Save the last width to restore it if re-enabled
                     onVisibleChanged: if (!visible)
                                           lastWidth = width
-                    onSwitchPage: (pageNumber, yOffset) => documentView.setPage(
-                                      pageNumber, yOffset)
+                    onSwitchPage: (pageNumber, yOffset) => {
+                                      documentView.setPage(
+                                          pageNumber,
+                                          yOffset * documentView.currentZoom)
+                                  }
 
                     Rectangle {
                         id: rightChaptersBorder
@@ -289,23 +290,96 @@ Page {
                     id: documentView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    bookController: BookController
+                    openedBookController: OpenedBookController
                 }
             }
         }
 
         MReadingSearchbar {
             id: searchbar
+            property int currentSearchHitPageNumber: -1
+
             visible: false
-            bookController: BookController
             Layout.fillWidth: true
 
             onVisibleChanged: toolbar.searchButton.active = visible
-            onSearchQueried: if (query.length)
-                                 BookController.search(query)
-            onClearQuery: BookController.clearSearch()
-            onNextButtonClicked: BookController.goToNextSearchHit()
-            onPreviousButtonClicked: BookController.goToPreviousSearchHit()
+
+            onSearchQueried: query => {
+                                 if (!query.length) {
+                                     return
+                                 }
+
+                                 let hitPageNumber = documentView.documentSearcher.search(
+                                     query, documentView.topPage)
+                                 if (hitPageNumber === -1) {
+                                     searchbar.setSearchError()
+                                 }
+                                 currentSearchHitPageNumber = hitPageNumber
+                             }
+
+            onClearQuery: {
+                documentView.documentSearcher.clearSearch()
+                documentView.removeSelectionsFromPage(
+                            currentSearchHitPageNumber)
+            }
+            onNextButtonClicked: {
+                currentSearchHitPageNumber = documentView.documentSearcher.goToNextSearchHit()
+            }
+            onPreviousButtonClicked: {
+                currentSearchHitPageNumber = documentView.documentSearcher.goToPreviousSearchHit()
+            }
+        }
+    }
+
+    HoverHandler {
+        id: hideCursorMechanism
+        acceptedDevices: PointerDevice.Mouse
+
+        onPointChanged: mouseHideTimer.updateTimerOnMouseMove(point.position.x,
+                                                              point.position.y)
+    }
+
+    Connections {
+        target: documentView
+
+        function onMouseMoved(x, y) {
+            mouseHideTimer.updateTimerOnMouseMove(x, y)
+        }
+    }
+
+    Timer {
+        id: mouseHideTimer
+        property real lastMouseX: -1
+        property real lastMouseY: -1
+        property bool hidden: false
+
+        interval: SettingsController.behaviorSettings.HideCursorAfterDelay
+        repeat: false
+
+        onTriggered: {
+            if (SettingsController.behaviorSettings.CursorMode !== "Hidden after delay") {
+                return
+            }
+
+            documentView.restoreCursor()
+            documentView.hideCursor()
+            mouseHideTimer.hidden = true
+        }
+
+        function updateTimerOnMouseMove(x, y) {
+            if (x === mouseHideTimer.lastMouseX
+                    || y === mouseHideTimer.lastMouseY) {
+                return
+            }
+
+            mouseHideTimer.lastMouseX = x
+            mouseHideTimer.lastMouseY = y
+            mouseHideTimer.restart()
+
+            if (mouseHideTimer.hidden) {
+                documentView.restoreCursor()
+                mouseHideTimer.hidden = false
+            }
         }
     }
 
@@ -314,7 +388,7 @@ Page {
         property bool fullScreen: false
         property int prevCurrentPage: -1
 
-        Component.onCompleted: prevCurrentPage = documentView.documentView.currentPage
+        Component.onCompleted: prevCurrentPage = documentView.currentPage
 
         function startFullScreenMode() {
             if (internal.fullScreen)
@@ -337,11 +411,11 @@ Page {
         }
 
         function goToEnd() {
-            documentView.setPage(BookController.pageCount - 1)
+            documentView.setPage(OpenedBookController.pageCount - 1)
         }
 
         function saveCurrentPage() {
-            let currentPage = documentView.documentView.currentPage
+            let currentPage = documentView.currentPage
             if (currentPage === internal.prevCurrentPage)
                 return
 

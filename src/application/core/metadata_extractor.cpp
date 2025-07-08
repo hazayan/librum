@@ -4,7 +4,7 @@
 #include <QFileInfo>
 #include "book_utils.hpp"
 #include "fz_utils.hpp"
-#include "page_generator.hpp"
+#include "mupdf_page_renderer.hpp"
 
 
 using namespace domain::value_objects;
@@ -18,7 +18,8 @@ bool MetadataExtractor::setup(const QString& filePath)
     try
     {
         auto stdFilePath = filePath.toStdString();
-        m_document = std::make_unique<mupdf::FzDocument>(stdFilePath.c_str());
+        m_mupdfDocumentAccess =
+            std::make_unique<MupdfDocumentAccess>(stdFilePath.c_str());
         return true;
     }
     catch(...)
@@ -46,7 +47,7 @@ domain::value_objects::BookMetaData MetadataExtractor::getBookMetaData()
         .language = "",
         .documentSize = documentSize,
         .pagesSize = "",
-        .pageCount = m_document->fz_count_pages(),
+        .pageCount = m_mupdfDocumentAccess->getPageCount(),
         .lastOpened = QDateTime(),
         .coverLastModified = QDateTime(),
         .coverPath = "",
@@ -139,7 +140,7 @@ QString MetadataExtractor::getDocumentInfo(const char* key)
 {
     try
     {
-        auto result = m_document->fz_lookup_metadata2(key);
+        auto result = m_mupdfDocumentAccess->lookupMetadata(key);
         if(result == "null")
             result = "";
 
@@ -155,7 +156,8 @@ QImage MetadataExtractor::getCover()
 {
     try
     {
-        core::PageGenerator page(m_document.get(), 0);
+        core::MupdfPageRenderer page(m_mupdfDocumentAccess->loadPage(0),
+                                     nullptr);
         return utils::qImageFromPixmap(page.renderPage(1.0));
     }
     catch(...)

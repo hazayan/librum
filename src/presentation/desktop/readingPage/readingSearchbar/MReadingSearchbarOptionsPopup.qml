@@ -48,7 +48,7 @@ Popup {
                     boxHeight: 18
                     spacing: 8
                     imageSize: 10
-                    checked: BookController.searchFromStart
+                    checked: false
                     text: qsTr("From start")
                     fontSize: Fonts.size12
 
@@ -62,7 +62,7 @@ Popup {
                     boxHeight: 18
                     spacing: 8
                     imageSize: 10
-                    checked: BookController.searchCaseSensitive
+                    checked: false
                     text: qsTr("Case sensitive")
                     fontSize: Fonts.size12
 
@@ -76,7 +76,7 @@ Popup {
                     boxHeight: 18
                     spacing: 8
                     imageSize: 10
-                    checked: BookController.searchWholeWords
+                    checked: false
                     text: qsTr("Whole words")
                     fontSize: Fonts.size12
 
@@ -100,9 +100,10 @@ Popup {
         id: internal
 
         function updateSearchOptions() {
-            BookController.searchWholeWords = wholeWordsBox.checked
-            BookController.searchCaseSensitive = caseSensitiveBox.checked
-            BookController.searchFromStart = fromStartBox.checked
+            documentView.documentSearcher.searchOptions.searchWholeWords = wholeWordsBox.checked
+            documentView.documentSearcher.searchOptions.searchCaseSensitive
+                    = caseSensitiveBox.checked
+            documentView.documentSearcher.searchOptions.searchFromStart = fromStartBox.checked
             root.settingsChanged()
         }
     }

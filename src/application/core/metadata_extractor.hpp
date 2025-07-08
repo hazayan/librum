@@ -2,6 +2,7 @@
 #include <memory>
 #include "i_metadata_extractor.hpp"
 #include "mupdf/classes.h"
+#include "mupdf_document_access.hpp"
 
 namespace application::core
 {
@@ -21,7 +22,7 @@ private:
     QString getBookExtension();
     double roundToPrecisionOf2(double raw);
 
-    std::unique_ptr<mupdf::FzDocument> m_document;
+    std::unique_ptr<MupdfDocumentAccess> m_mupdfDocumentAccess;
     QString m_filePath;
 };
 

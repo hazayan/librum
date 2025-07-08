@@ -102,14 +102,13 @@ Page {
         MExternalReadingToolBar {
             id: toolbar
             Layout.fillWidth: true
-            currentPage: ExternalBookController.currentPage
-            pageCount: ExternalBookController.pageCount
+            currentPage: ExternalOpenedBookController.currentPage
+            pageCount: ExternalOpenedBookController.pageCount
             bookTitle: ""
 
             onBackButtonClicked: {
-                loadPage(homePage, sidebar.homeItem, false)
-
                 baseRoot.externalBookMode = false
+                loadPage(homePage, sidebar.homeItem, false)
             }
 
             onChapterButtonClicked: {
@@ -135,6 +134,8 @@ Page {
             onOptionsPopupVisibileChanged: {
                 optionsButton.active = !optionsButton.active
             }
+
+            onZoomChanged: newZoom => documentView.setZoom(newZoom)
 
             PropertyAnimation {
                 id: hideToolbar
@@ -193,7 +194,7 @@ Page {
                     property bool active: false
                     anchors.fill: parent
                     visible: false
-                    model: ExternalBookController.tableOfContents
+                    model: documentView.tableOfContents
 
                     // Save the last width to restore it if re-enabled
                     onVisibleChanged: if (!visible)
@@ -234,7 +235,7 @@ Page {
                     id: documentView
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    bookController: ExternalBookController
+                    openedBookController: ExternalOpenedBookController
                 }
             }
         }
@@ -243,22 +244,20 @@ Page {
             id: searchbar
             visible: false
             Layout.fillWidth: true
-            bookController: ExternalBookController
 
-            // onVisibleChanged: toolbar.searchButton.active = visible
-            onSearchQueried: if (query.length)
-                                 ExternalBookController.search(query)
-            onClearQuery: ExternalBookController.clearSearch()
-            onNextButtonClicked: ExternalBookController.goToNextSearchHit()
-            onPreviousButtonClicked: ExternalBookController.goToPreviousSearchHit()
+            onVisibleChanged: toolbar.searchButton.active = visible
+            onSearchQueried: {
+                if (!query.length)
+                    return
+
+                let success = documentView.documentSearcher.search(query)
+                if (!success)
+                    searchbar.setSearchError()
+            }
+            onClearQuery: documentView.documentSearcher.clearSearch
+            onNextButtonClicked: documentView.documentSearcher.goToNextSearchHit()
+            onPreviousButtonClicked: documentView.documentSearcher.goToPreviousSearchHit()
         }
-    }
-
-    function getYOffset() {
-        let yOffset = documentView.getYOffset()
-        let restoredYOffset = yOffset / ExternalBookController.zoom
-
-        return restoredYOffset
     }
 
     QtObject {
@@ -286,7 +285,7 @@ Page {
         }
 
         function goToEnd() {
-            documentView.setPage(ExternalBookController.pageCount - 1)
+            documentView.setPage(ExternalOpenedBookController.pageCount - 1)
         }
     }
 }

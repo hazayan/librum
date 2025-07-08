@@ -852,7 +852,7 @@ Page {
             else if (bookMultiSelectOptionsPopup.opened)
                 bookMultiSelectOptionsPopup.close()
 
-            BookController.setUp(Globals.selectedBook.uuid)
+            OpenedBookController.setUp(Globals.selectedBook.uuid)
 
             LibraryController.refreshLastOpenedFlag(Globals.selectedBook.uuid)
             loadPage(readingPage)
