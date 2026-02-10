@@ -35,6 +35,8 @@ librum_sources = [
 # Resource files
 resource_files = [
   '../fonts.qrc',
+  '../resources.qrc',
+  'presentation/qmlSources.qrc',
 ]
 
 # Windows-specific resource file
