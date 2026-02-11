@@ -15,7 +15,7 @@ use_sanitizers = get_option('use_sanitizers')
 # Qt6 dependencies
 qt6 = import('qt6')
 qt6_dep = dependency('qt6',
-  modules: ['Core', 'Quick', 'Widgets', 'Network', 'Gui', 'QuickControls2'],
+  modules: ['Core', 'Quick', 'Widgets', 'Network', 'Gui', 'QuickControls2', 'Test'],
   required: true
 )
 
@@ -98,6 +98,11 @@ if use_sanitizers
   link_args += sanitizer_args
 endif
 
+# Add pthread for tests if gmock/gtest requires it
+if build_tests
+  link_args += ['-pthread']
+endif
+
 # System dependencies
 # MuPDF - use system library
 mupdf_dep = dependency('mupdf', required: false)
@@ -130,9 +135,9 @@ di_dep = declare_dependency(
   compile_args: ['-I/usr/include', '-I/usr/local/include', '-I/usr/include/boost-di']
 )
 
-# googletest for tests - use system package
+# googletest/gmock for tests - use system package
 if build_tests
-  gtest_dep = dependency('gtest', main: true, required: true)
+  gtest_dep = dependency('gmock', required: true)
 else
   gtest_dep = dependency('', required: false)
 endif
@@ -141,7 +146,7 @@ endif
 subdir('src')
 
 if build_tests
-  subdir('tests')
+  # Tests are now inline in src subdirectories
 endif
 
 # Summary
@@ -159,3 +164,60 @@ Librum build configuration:
   host_machine.system(),
   get_option('buildtype')
 ))
+
+# Coverage report generation
+if enable_coverage
+  gcovr = find_program('gcovr', required: false)
+  if gcovr.found()
+    run_target('coverage-report',
+      command: [
+        gcovr,
+        '--root', meson.project_source_root(),
+        '--exclude', '.*tests.*',
+        '--exclude', '.*moc_.*',
+        '--exclude', '.*qrc_.*',
+        '--exclude', '.*ui_.*',
+        '--print-summary',
+        '--html',
+        '--html-details',
+        '-o', meson.project_build_root() / 'coverage.html',
+        '-j', '4'
+      ],
+      depends: [
+        meson.get_target('domain'),
+        meson.get_target('application'),
+        meson.get_target('adapters'),
+        meson.get_target('infrastructure'),
+        meson.get_target('presentation'),
+        meson.get_target('librum')
+      ]
+    )
+
+    run_target('coverage-xml',
+      command: [
+        gcovr,
+        '--root', meson.project_source_root(),
+        '--exclude', '.*tests.*',
+        '--exclude', '.*moc_.*',
+        '--exclude', '.*qrc_.*',
+        '--exclude', '.*ui_.*',
+        '--print-summary',
+        '--xml',
+        '-o', meson.project_build_root() / 'coverage.xml',
+        '-j', '4'
+      ],
+      depends: [
+        meson.get_target('domain'),
+        meson.get_target('application'),
+        meson.get_target('adapters'),
+        meson.get_target('infrastructure'),
+        meson.get_target('presentation'),
+        meson.get_target('librum')
+      ]
+    )
+
+    message('Coverage targets available: coverage-report, coverage-xml')
+  else
+    warning('gcovr not found - coverage reports will not be generated')
+  endif
+endif

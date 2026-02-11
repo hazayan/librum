@@ -190,4 +190,53 @@ application_lib = static_library('application',
 application_dep = declare_dependency(
   include_directories: application_inc,
   compile_args: application_defines,
+  link_with: application_lib,
 )
+
+# Application unit tests
+if get_option('build_tests')
+  application_test_sources = [
+    '../../tests/application_unit_tests/main.cpp',
+    '../../tests/application_unit_tests/services/library_service_tests.cpp',
+    '../../tests/application_unit_tests/services/authentication_service_tests.cpp',
+    '../../tests/application_unit_tests/services/user_service_tests.cpp',
+    '../../tests/application_unit_tests/services/folder_service_tests.cpp',
+    '../../tests/application_unit_tests/services/settings_service_tests.cpp',
+    '../../tests/application_unit_tests/utility/enum_utils_tests.cpp',
+    '../../tests/application_unit_tests/utility/book_merger_tests.cpp',
+    '../../tests/application_unit_tests/utility/library_storage_manager_tests.cpp',
+    '../../tests/application_unit_tests/utility/local_library_tracker_tests.cpp',
+  ]
+
+  # Test headers that need MOC processing
+  test_moc_headers = [
+    '../../tests/application_unit_tests/utility/test_enum.hpp',
+  ]
+
+  # Qt6 preprocessing for test headers
+  qt6_test_preprocessed = qt6.preprocess(
+    moc_headers: test_moc_headers,
+    dependencies: qt6_dep,
+  )
+
+  application_unit_tests = executable('application_unit_tests',
+    sources: application_test_sources + [qt6_test_preprocessed],
+    include_directories: [application_inc, include_directories('../../tests/application_unit_tests'), include_directories('../../tests/application_unit_tests/utility'), include_directories('../../tests/application_unit_tests/services')],
+    dependencies: [
+      gtest_dep,
+      application_dep,
+      domain_dep,
+      rapidfuzz_dep,
+      mupdf_dep,
+      qt6_dep,
+    ],
+    cpp_args: cpp_args,
+    link_args: link_args,
+    install: false,
+  )
+
+  test('ApplicationUnitTests', application_unit_tests,
+    timeout: 300,
+    is_parallel: false,
+  )
+endif
