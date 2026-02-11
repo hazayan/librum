@@ -86,4 +86,5 @@ infrastructure_lib = static_library('infrastructure',
 infrastructure_dep = declare_dependency(
   include_directories: infrastructure_inc,
   compile_args: infrastructure_defines,
+  link_with: infrastructure_lib,
 )

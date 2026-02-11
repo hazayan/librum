@@ -20,6 +20,7 @@ domain_headers = [
   'entities/rectf.hpp',
   'entities/bookmark.hpp',
   'entities/folder.hpp',
+  'entities/free_book.hpp',
   'value_objects/login_model.hpp',
   'value_objects/register_model.hpp',
   'value_objects/book_meta_data.hpp',
@@ -64,4 +65,33 @@ domain_lib = static_library('domain',
 domain_dep = declare_dependency(
   include_directories: domain_inc,
   compile_args: domain_defines,
+  link_with: domain_lib,
 )
+
+# Domain unit tests
+if get_option('build_tests')
+  domain_test_sources = [
+    '../../tests/domain_unit_tests/main.cpp',
+    '../../tests/domain_unit_tests/book_tests.cpp',
+    '../../tests/domain_unit_tests/user_tests.cpp',
+    '../../tests/domain_unit_tests/tag_tests.cpp',
+  ]
+
+  domain_unit_tests = executable('domain_unit_tests',
+    sources: domain_test_sources,
+    include_directories: [domain_inc, include_directories('../../tests/domain_unit_tests')],
+    dependencies: [
+      gtest_dep,
+      domain_dep,
+      qt6_dep,
+    ],
+    cpp_args: cpp_args,
+    link_args: link_args,
+    install: false,
+  )
+
+  test('DomainUnitTests', domain_unit_tests,
+    timeout: 300,
+    is_parallel: false,
+  )
+endif

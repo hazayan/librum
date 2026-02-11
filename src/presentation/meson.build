@@ -17,6 +17,21 @@ resource_files = [
   'qmlSources.qrc',
 ]
 
+# Translation files
+translation_files = [
+  'translations/librum_en.ts',
+  'translations/librum_de.ts',
+  'translations/librum_it.ts',
+  'translations/librum_ru.ts',
+  'translations/librum_ko.ts',
+  'translations/librum_ar.ts',
+  'translations/librum_zh.ts',
+  'translations/librum_uk.ts',
+  'translations/librum_pt.ts',
+  'translations/librum_id.ts',
+  'translations/librum_bn.ts',
+]
+
 # Include directories
 presentation_inc = include_directories(
   'modules/CppElements',
@@ -31,6 +46,13 @@ qt6_preprocessed = qt6.preprocess(
   dependencies: qt6_dep,
 )
 
+# Compile translations
+qt6_translations = qt6.compile_translations(
+  ts_files: translation_files,
+  install: true,
+  install_dir: join_paths(get_option('datadir'), 'translations'),
+)
+
 # Compile definitions
 presentation_defines = []
 if get_option('buildtype').startswith('debug')
@@ -43,6 +65,7 @@ presentation_lib = static_library('presentation',
     presentation_sources,
     presentation_headers,
     qt6_preprocessed,
+    qt6_translations,
   ],
   include_directories: presentation_inc,
   dependencies: [
@@ -63,4 +86,5 @@ presentation_lib = static_library('presentation',
 presentation_dep = declare_dependency(
   include_directories: presentation_inc,
   compile_args: presentation_defines,
+  link_with: presentation_lib,
 )

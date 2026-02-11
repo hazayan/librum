@@ -230,4 +230,60 @@ adapters_lib = static_library('adapters',
 adapters_dep = declare_dependency(
   include_directories: adapters_inc,
   compile_args: adapters_defines,
+  link_with: adapters_lib,
 )
+
+# Adapters unit tests
+if get_option('build_tests')
+  adapters_test_sources = [
+    '../../tests/adapters_unit_tests/main.cpp',
+    '../../tests/adapters_unit_tests/controllers/authentication_controller_tests.cpp',
+    '../../tests/adapters_unit_tests/controllers/library_controller_tests.cpp',
+    '../../tests/adapters_unit_tests/controllers/settings_controller_tests.cpp',
+    '../../tests/adapters_unit_tests/controllers/user_controller_tests.cpp',
+    '../../tests/adapters_unit_tests/data_models/library_proxy_model_tests.cpp',
+    '../../tests/adapters_unit_tests/gateways/authentication_gateway_tests.cpp',
+    '../../tests/adapters_unit_tests/gateways/library_storage_gateway_tests.cpp',
+    '../../tests/adapters_unit_tests/gateways/user_storage_gateway_tests.cpp',
+  ]
+
+  adapters_test_headers = [
+    '../../tests/adapters_unit_tests/data_models/test_data/filter_by_request_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/filter_by_tags_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_authors_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_fuzzing_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_last_opened_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_reading_progress_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_recently_added_test_data.hpp',
+    '../../tests/adapters_unit_tests/data_models/test_data/sort_by_title_test_data.hpp',
+  ]
+
+  adapters_unit_tests = executable('adapters_unit_tests',
+    sources: adapters_test_sources + adapters_test_headers,
+    include_directories: [
+      adapters_inc,
+      include_directories('../../tests/adapters_unit_tests'),
+      include_directories('../../tests/adapters_unit_tests/data_models/test_data'),
+      include_directories('../../tests/adapters_unit_tests/controllers'),
+      include_directories('../../tests/adapters_unit_tests/gateways'),
+      include_directories('../../tests/adapters_unit_tests/data_models'),
+    ],
+    dependencies: [
+      gtest_dep,
+      adapters_dep,
+      application_dep,
+      domain_dep,
+      mupdf_dep,
+      rapidfuzz_dep,
+      qt6_dep,
+    ],
+    cpp_args: cpp_args,
+    link_args: link_args,
+    install: false,
+  )
+
+  test('AdaptersUnitTests', adapters_unit_tests,
+    timeout: 300,
+    is_parallel: false,
+  )
+endif
